@@ -95,7 +95,7 @@ const PlinkoBoard = ({ isPlaying, result }) => {
             key={slot.id}
             data-testid={`plinko-slot-${slot.id}`}
             className={`
-              relative h-20 rounded-lg border-2 flex flex-col items-center justify-center
+              relative w-16 h-20 rounded-lg border-2 flex flex-col items-center justify-center
               transition-all duration-300
               ${getSlotColor(slot)}
               ${isWinningSlot && result.slot === slot.id ? 'ring-4 ring-yellow-400 scale-110 shadow-xl' : ''}
