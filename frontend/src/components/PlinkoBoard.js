@@ -89,7 +89,7 @@ const PlinkoBoard = ({ isPlaying, result }) => {
       </div>
 
       {/* Slots */}
-      <div className="grid grid-cols-20 gap-1">
+      <div className="flex gap-1">
         {SLOT_CONFIG.map((slot) => (
           <motion.div
             key={slot.id}
