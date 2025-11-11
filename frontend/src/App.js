@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import PlinkoGame from './pages/PlinkoGame';
+import PlinkoGame369 from './pages/PlinkoGame369';
 import AdminDashboard from './pages/AdminDashboard';
 import '@/App.css';
 
@@ -9,7 +9,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<PlinkoGame />} />
+          <Route path="/" element={<PlinkoGame369 />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
