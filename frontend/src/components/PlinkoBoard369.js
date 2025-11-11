@@ -79,7 +79,7 @@ const PlinkoBoard369 = ({
               <>
                 <div className="logo">{TOKEN_LOGOS[s.token]}</div>
                 <div className="mult">x{Number(s.multiplier).toFixed(1)}</div>
-              <>
+              </>
             ) : (
               <div className="slot-peg" />
             )}
