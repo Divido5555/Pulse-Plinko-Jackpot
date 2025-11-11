@@ -67,8 +67,8 @@ const PlinkoBoard369 = ({
         )}
       </div>
 
-      {/* Slots Grid */}
-      <div className="slots-grid">
+      {/* Slots - Single Row at Bottom */}
+      <div className="slots-row">
         {SLOTS.map((s) => (
           <div
             key={s.index}
