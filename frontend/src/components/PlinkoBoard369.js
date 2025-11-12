@@ -109,6 +109,11 @@ const PlinkoBoard369 = ({
                 MINI
               </div>
             )}
+            {s.index === mainIndex && (
+              <div className="main-badge" title="Main jackpot active here">
+                MAIN
+              </div>
+            )}
           </div>
         ))}
       </div>
