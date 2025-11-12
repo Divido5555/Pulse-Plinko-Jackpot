@@ -34,6 +34,12 @@ const PlinkoGame369 = () => {
     totalSpent: 0,
     totalWinnings: 0,
   });
+  
+  // Local jackpot tracking (grows with each play)
+  const [localJackpots, setLocalJackpots] = useState({
+    main: 52341.50,
+    mini: 8762.30,
+  });
 
   useEffect(() => {
     fetchGameState();
