@@ -1,4 +1,6 @@
 // Slot configuration for Plinko game
+import { TOKEN_IMAGES } from './tokenAssets';
+
 export const SLOTS = [
   { index: 0,  kind: "lose" },
   { index: 1,  kind: "win", token: "PLS",    multiplier: 1.1 },
@@ -29,12 +31,14 @@ export const SLOTS = [
 // Mini jackpot can visually hop to any of these indices
 export const MINI_CANDIDATE_INDICES = [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19];
 
-export const TOKEN_LOGOS = {
-  PLS: '💎',
-  PLSX: '⚡',
-  HEX: '🔷',
-  INC: '🎁',
-  PROVEX: '🚀'
-};
+// Export token images for use in components
+export const TOKEN_LOGOS = TOKEN_IMAGES;
 
-export const FLOATING_BALLS = ['💎', '⚡', '🔷', '🎁', '🚀'];
+// Floating balls - use actual token images
+export const FLOATING_BALLS = [
+  TOKEN_IMAGES.PLS,
+  TOKEN_IMAGES.PLSX,
+  TOKEN_IMAGES.HEX,
+  TOKEN_IMAGES.INC,
+  TOKEN_IMAGES.PROVEX
+];
