@@ -194,6 +194,17 @@
   margin-right: 6px;
 }
 
+.main-chip {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #451a03;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-weight: 800;
+  font-size: 11px;
+  margin: 0 6px;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+
 /* === Pegs Area === */
 .pegs-area {
   position: relative;
