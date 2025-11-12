@@ -108,9 +108,13 @@ const PlinkoGame369 = () => {
       const prizeSlots = { 1: 1.1, 5: 1.5, 9: 2.0, 13: 3.0, 17: 5.0 };
       const payout = prizeSlots[landedSlot] || 0;
       
-      // Check if ball landed on jackpot slots
-      const miniHit = landedSlot === miniIndex;
-      const mainHit = landedSlot === mainIndex;
+      // Check if ball landed on jackpot slots AND passes probability check
+      const landedOnMini = landedSlot === miniIndex;
+      const landedOnMain = landedSlot === mainIndex;
+      
+      // Actual jackpot odds (very rare)
+      const miniHit = landedOnMini && (Math.random() < (1 / 53000)); // 1 in 53,000
+      const mainHit = landedOnMain && (Math.random() < (1 / 1200000)); // 1 in 1.2M
 
       let winAmount = 0;
       const isWin = payout > 0 || miniHit || mainHit;
@@ -166,6 +170,12 @@ const PlinkoGame369 = () => {
         setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
         toast.success(`You won ${payout}x!`, {
           description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
+        });
+      } else if (landedOnMini || landedOnMain) {
+        // Landed on jackpot slot but didn't win - close call!
+        setBanner({ kind: 'lose', text: 'So close! Try again!' });
+        toast.info('Almost hit the jackpot!', {
+          description: `Landed on ${landedOnMini ? 'MINI' : 'MAIN'} slot but didn't trigger. Keep playing!`,
         });
       } else {
         // Loss - jackpots already increased
