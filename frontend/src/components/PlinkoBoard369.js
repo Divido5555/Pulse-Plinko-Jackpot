@@ -83,7 +83,7 @@ const PlinkoBoard369 = ({
           >
             {s.kind === 'win' ? (
               <>
-                <div className="logo">{TOKEN_LOGOS[s.token]}</div>
+                <img src={TOKEN_LOGOS[s.token]} alt={s.token} className="logo" />
                 <div className="mult">x{Number(s.multiplier).toFixed(1)}</div>
               </>
             ) : (
