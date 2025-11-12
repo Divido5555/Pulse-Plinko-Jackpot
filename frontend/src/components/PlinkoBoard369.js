@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
+import { PULSE369_LOGO } from '../config/tokenAssets';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 
