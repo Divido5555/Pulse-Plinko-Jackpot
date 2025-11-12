@@ -40,6 +40,10 @@ const PlinkoGame369 = () => {
     main: 52341.50,
     mini: 8762.30,
   });
+  
+  // Track jackpot slot indices
+  const [miniIndex, setMiniIndex] = useState(null);
+  const [mainIndex, setMainIndex] = useState(null);
 
   useEffect(() => {
     fetchGameState();
