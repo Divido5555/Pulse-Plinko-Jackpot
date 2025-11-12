@@ -42,7 +42,9 @@ const PlinkoBoard369 = ({
     <div className="board-frame" data-testid="plinko-board-369">
       <div className="mini-banner-top">
         <span className="mini-chip">MINI</span>
-        <b>{miniAmountPLS} PLS</b> — moves each play
+        <b>{miniAmountPLS} PLS</b> • 
+        <span className="main-chip">MAIN</span>
+        <b>Moving</b> — both move each play
       </div>
 
       {/* Plinko Pegs */}
