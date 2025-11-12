@@ -27,7 +27,7 @@ const PlinkoGame369 = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   
   // Player wallet & session state
-  const [playerBalance, setPlayerBalance] = useState(0);
+  const [playerBalance, setPlayerBalance] = useState(100000); // Start with 100,000 PLS for testing
   const [sessionStats, setSessionStats] = useState({
     gamesPlayed: 0,
     wins: 0,
