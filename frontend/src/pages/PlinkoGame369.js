@@ -215,8 +215,8 @@ const PlinkoGame369 = () => {
 
       <div className="content-wrapper">
         <GameHeader
-          miniAmountPLS={gameState?.mini_jackpot?.toFixed(2) || '0.00'}
-          mainAmountPLS={gameState?.main_jackpot?.toFixed(2) || '0.00'}
+          miniAmountPLS={localJackpots.mini.toFixed(2)}
+          mainAmountPLS={localJackpots.main.toFixed(2)}
         />
 
         <div className="game-layout">
