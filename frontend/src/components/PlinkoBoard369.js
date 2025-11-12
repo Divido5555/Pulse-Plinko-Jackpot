@@ -13,6 +13,7 @@ const PlinkoBoard369 = ({
   onBallLanded,
   miniAmountPLS,
   finalSlot,
+  onJackpotIndicesChange,
 }) => {
   const [miniIndex, setMiniIndex] = useState(
     () => MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)]
@@ -35,8 +36,13 @@ const PlinkoBoard369 = ({
         mainIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
       } while (mainIdx === miniIdx);
       setMainIndex(mainIdx);
+      
+      // Notify parent of new indices
+      if (onJackpotIndicesChange) {
+        onJackpotIndicesChange(miniIdx, mainIdx);
+      }
     }
-  }, [isBallFalling]);
+  }, [isBallFalling, onJackpotIndicesChange]);
 
   return (
     <div className="board-frame" data-testid="plinko-board-369">
