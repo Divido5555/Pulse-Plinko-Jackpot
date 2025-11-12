@@ -223,6 +223,14 @@ const PlinkoGame369 = () => {
 
           {/* Stats Sidebar */}
           <div className="stats-column">
+            {/* Player Wallet */}
+            <PlayerWallet
+              balance={playerBalance}
+              onDeposit={handleDeposit}
+              onWithdraw={handleWithdraw}
+              sessionStats={sessionStats}
+            />
+
             {stats && (
               <Card className="stats-card">
                 <CardHeader>
