@@ -120,8 +120,13 @@ const PlinkoGame369 = () => {
 
       // Show result banner AFTER ball lands
       if (mainHit) {
-        winAmount = gameState?.main_jackpot || 1000000;
+        // Main Jackpot: Pay 60%, keep 40% for reset/fees
+        winAmount = localJackpots.main * 0.60;
         setPlayerBalance(prev => prev + winAmount);
+        setLocalJackpots(prev => ({
+          ...prev,
+          main: prev.main * 0.40, // 40% stays (will be split: 10% burn, 10% host, 10% dev, 10% reset)
+        }));
         setSessionStats(prev => ({
           ...prev,
           totalWinnings: prev.totalWinnings + winAmount,
@@ -131,8 +136,13 @@ const PlinkoGame369 = () => {
           description: `You won ${winAmount.toLocaleString()} PLS!`,
         });
       } else if (miniHit) {
-        winAmount = gameState?.mini_jackpot || 10000;
+        // Mini Jackpot: Pay 80%, keep 20% for reset/fees
+        winAmount = localJackpots.mini * 0.80;
         setPlayerBalance(prev => prev + winAmount);
+        setLocalJackpots(prev => ({
+          ...prev,
+          mini: prev.mini * 0.20, // 20% stays (will be split: 10% host, 10% reset)
+        }));
         setSessionStats(prev => ({
           ...prev,
           totalWinnings: prev.totalWinnings + winAmount,
@@ -142,6 +152,7 @@ const PlinkoGame369 = () => {
           description: `You won ${winAmount.toLocaleString()} PLS!`,
         });
       } else if (payout > 0) {
+        // Regular win from base prize pool (32% of entries)
         winAmount = ENTRY_FEE_PLS * payout;
         setPlayerBalance(prev => prev + winAmount);
         setSessionStats(prev => ({
@@ -153,9 +164,10 @@ const PlinkoGame369 = () => {
           description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
         });
       } else {
+        // Loss - jackpots already increased
         setBanner({ kind: 'lose', text: 'Try again!' });
         toast.info('Try again!', {
-          description: `Ball landed in slot ${landedSlot}`,
+          description: `Ball landed in slot ${landedSlot}. Jackpots are growing!`,
         });
       }
 
