@@ -17,12 +17,24 @@ const PlinkoBoard369 = ({
   const [miniIndex, setMiniIndex] = useState(
     () => MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)]
   );
+  
+  const [mainIndex, setMainIndex] = useState(
+    () => MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)]
+  );
 
-  // Shuffle mini badge when not playing
+  // Shuffle both badges when not playing
   useEffect(() => {
     if (!isBallFalling) {
-      const i = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
-      setMiniIndex(i);
+      // Mini badge
+      const miniIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
+      setMiniIndex(miniIdx);
+      
+      // Main badge - ensure it's different from mini
+      let mainIdx;
+      do {
+        mainIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
+      } while (mainIdx === miniIdx);
+      setMainIndex(mainIdx);
     }
   }, [isBallFalling]);
 
