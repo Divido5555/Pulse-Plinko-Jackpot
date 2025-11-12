@@ -96,19 +96,46 @@ const PlinkoGame369 = () => {
       const miniHit = Math.random() < 0.0001; // 1 in 10k for demo
       const mainHit = Math.random() < 0.00001; // 1 in 100k for demo
 
+      let winAmount = 0;
+      const isWin = payout > 0 || miniHit || mainHit;
+
+      // Update session stats
+      setSessionStats(prev => ({
+        ...prev,
+        gamesPlayed: prev.gamesPlayed + 1,
+        wins: isWin ? prev.wins + 1 : prev.wins,
+      }));
+
       // Show result banner AFTER ball lands
       if (mainHit) {
+        winAmount = gameState?.main_jackpot || 1000000;
+        setPlayerBalance(prev => prev + winAmount);
+        setSessionStats(prev => ({
+          ...prev,
+          totalWinnings: prev.totalWinnings + winAmount,
+        }));
         setBanner({ kind: 'main', text: 'MAIN JACKPOT!!!' });
         toast.success('MAIN JACKPOT WON!', {
-          description: `You won ${gameState?.main_jackpot} PLS!`,
+          description: `You won ${winAmount.toLocaleString()} PLS!`,
         });
       } else if (miniHit) {
+        winAmount = gameState?.mini_jackpot || 10000;
+        setPlayerBalance(prev => prev + winAmount);
+        setSessionStats(prev => ({
+          ...prev,
+          totalWinnings: prev.totalWinnings + winAmount,
+        }));
         setBanner({ kind: 'mini', text: 'MINI JACKPOT!' });
         toast.success('MINI JACKPOT WON!', {
-          description: `You won ${gameState?.mini_jackpot} PLS!`,
+          description: `You won ${winAmount.toLocaleString()} PLS!`,
         });
       } else if (payout > 0) {
-        const winAmount = ENTRY_FEE_PLS * payout;
+        winAmount = ENTRY_FEE_PLS * payout;
+        setPlayerBalance(prev => prev + winAmount);
+        setSessionStats(prev => ({
+          ...prev,
+          totalWinnings: prev.totalWinnings + winAmount,
+        }));
         setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
         toast.success(`You won ${payout}x!`, {
           description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
@@ -141,6 +168,21 @@ const PlinkoGame369 = () => {
       console.error('Error handling ball landed:', error);
       setIsBallFalling(false);
     }
+  };
+
+  const handleDeposit = (amount) => {
+    setPlayerBalance(prev => prev + amount);
+  };
+
+  const handleWithdraw = (amount) => {
+    setPlayerBalance(0);
+    // Reset session stats on withdrawal
+    setSessionStats({
+      gamesPlayed: 0,
+      wins: 0,
+      totalSpent: 0,
+      totalWinnings: 0,
+    });
   };
 
   return (
