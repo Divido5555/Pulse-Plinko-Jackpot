@@ -65,6 +65,21 @@ const PlinkoGame369 = () => {
   };
 
   const handleLaunch = async () => {
+    // Check balance
+    if (playerBalance < ENTRY_FEE_PLS) {
+      toast.error('Insufficient balance', {
+        description: `You need ${ENTRY_FEE_PLS.toLocaleString()} PLS to play`,
+      });
+      return;
+    }
+
+    // Deduct entry fee
+    setPlayerBalance(prev => prev - ENTRY_FEE_PLS);
+    setSessionStats(prev => ({
+      ...prev,
+      totalSpent: prev.totalSpent + ENTRY_FEE_PLS,
+    }));
+
     // Generate random slot
     const slot = Math.floor(Math.random() * 20);
     setFinalSlot(slot);
