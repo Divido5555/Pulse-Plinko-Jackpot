@@ -86,6 +86,12 @@ const PlinkoGame369 = () => {
       totalSpent: prev.totalSpent + ENTRY_FEE_PLS,
     }));
 
+    // Add to jackpots (50% to main, 15% to mini)
+    setLocalJackpots(prev => ({
+      main: prev.main + (ENTRY_FEE_PLS * 0.50),
+      mini: prev.mini + (ENTRY_FEE_PLS * 0.15),
+    }));
+
     // Generate random slot
     const slot = Math.floor(Math.random() * 20);
     setFinalSlot(slot);
