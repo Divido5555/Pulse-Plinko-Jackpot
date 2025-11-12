@@ -226,7 +226,7 @@ const PlinkoGame369 = () => {
               isBallFalling={isBallFalling}
               onLaunch={handleLaunch}
               onBallLanded={handleBallLanded}
-              miniAmountPLS={gameState?.mini_jackpot?.toFixed(2) || '0.00'}
+              miniAmountPLS={localJackpots.mini.toFixed(2)}
               finalSlot={finalSlot}
             />
 
