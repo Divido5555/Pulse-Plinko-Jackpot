@@ -6,10 +6,12 @@ import GameHeader from '../components/GameHeader';
 import PlinkoBoard369 from '../components/PlinkoBoard369';
 import ResultBanner from '../components/ResultBanner';
 import AdminGate from '../components/AdminGate';
+import PlayerWallet from '../components/PlayerWallet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
 import '@/styles/pulse369.css';
+import '@/styles/wallet.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -23,6 +25,15 @@ const PlinkoGame369 = () => {
   const [connectedAddress, setConnectedAddress] = useState(null);
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  
+  // Player wallet & session state
+  const [playerBalance, setPlayerBalance] = useState(0);
+  const [sessionStats, setSessionStats] = useState({
+    gamesPlayed: 0,
+    wins: 0,
+    totalSpent: 0,
+    totalWinnings: 0,
+  });
 
   useEffect(() => {
     fetchGameState();
