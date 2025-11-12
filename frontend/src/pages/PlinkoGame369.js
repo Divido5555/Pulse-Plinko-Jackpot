@@ -104,9 +104,9 @@ const PlinkoGame369 = () => {
       const prizeSlots = { 1: 1.1, 5: 1.5, 9: 2.0, 13: 3.0, 17: 5.0 };
       const payout = prizeSlots[landedSlot] || 0;
       
-      // Simulate mini/main jackpot (very rare)
-      const miniHit = Math.random() < 0.0001; // 1 in 10k for demo
-      const mainHit = Math.random() < 0.00001; // 1 in 100k for demo
+      // Check if ball landed on jackpot slots
+      const miniHit = landedSlot === miniIndex;
+      const mainHit = landedSlot === mainIndex;
 
       let winAmount = 0;
       const isWin = payout > 0 || miniHit || mainHit;
