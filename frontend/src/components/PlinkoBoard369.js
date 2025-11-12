@@ -70,7 +70,9 @@ const PlinkoBoard369 = ({
               ease: 'easeIn',
             }}
             onAnimationComplete={() => onBallLanded && onBallLanded(finalSlot)}
-          />
+          >
+            <img src={PULSE369_LOGO} alt="Pulse369 DAO" className="ball-logo" />
+          </motion.div>
         )}
       </div>
 
