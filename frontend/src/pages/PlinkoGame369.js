@@ -13,6 +13,7 @@ import '@/styles/pulse369.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const ENTRY_FEE_PLS = 10000; // 10,000 PLS per play
 
 const PlinkoGame369 = () => {
   const [gameState, setGameState] = useState(null);
@@ -81,9 +82,10 @@ const PlinkoGame369 = () => {
           description: `You won ${gameState?.mini_jackpot} PLS!`,
         });
       } else if (payout > 0) {
-        setBanner({ kind: 'win', text: `WIN x${payout.toFixed(1)}!` });
+        const winAmount = ENTRY_FEE_PLS * payout;
+        setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
         toast.success(`You won ${payout}x!`, {
-          description: `Ball landed in slot ${landedSlot}`,
+          description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
         });
       } else {
         setBanner({ kind: 'lose', text: 'Try again!' });
@@ -142,7 +144,7 @@ const PlinkoGame369 = () => {
                 <CardTitle>How to Play</CardTitle>
               </CardHeader>
               <CardContent className="info-content">
-                <p><strong>• Entry:</strong> 1 PLS per game (~$1)</p>
+                <p><strong>• Entry:</strong> {ENTRY_FEE_PLS.toLocaleString()} PLS per game</p>
                 <p><strong>• Winners:</strong> Slots 1, 5, 9, 13, 17 (PLS/PLSX/HEX/INC/PROVEX)</p>
                 <p><strong>• Mini Jackpot:</strong> Moves to random slot each play</p>
                 <p><strong>• Main Jackpot:</strong> Ultra-rare, life-changing prize</p>

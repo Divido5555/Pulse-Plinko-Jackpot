@@ -4,6 +4,8 @@ import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 
+const ENTRY_FEE_PLS = 10000; // 10,000 PLS
+
 const PlinkoBoard369 = ({
   isBallFalling,
   onLaunch,
@@ -32,9 +34,9 @@ const PlinkoBoard369 = ({
 
       {/* Plinko Pegs */}
       <div className="pegs-area">
-        {[...Array(8)].map((_, rowIndex) => (
+        {[...Array(10)].map((_, rowIndex) => (
           <div key={rowIndex} className="peg-row">
-            {[...Array(Math.min(10, rowIndex + 3))].map((_, pegIndex) => (
+            {[...Array(Math.min(20, rowIndex + 5))].map((_, pegIndex) => (
               <div key={pegIndex} className="peg" />
             ))}
           </div>
@@ -47,19 +49,23 @@ const PlinkoBoard369 = ({
             className="plinko-ball"
             initial={{ top: 0, left: '50%', x: '-50%' }}
             animate={{
-              top: [0, 50, 100, 150, 200, 250, 290],
+              top: [0, 40, 80, 120, 160, 200, 240, 280, 320, 350, 370],
               left: [
                 '50%',
+                `${48 + Math.random() * 4}%`,
                 `${45 + Math.random() * 10}%`,
-                `${40 + Math.random() * 20}%`,
-                `${35 + Math.random() * 30}%`,
+                `${42 + Math.random() * 16}%`,
+                `${38 + Math.random() * 24}%`,
+                `${34 + Math.random() * 32}%`,
                 `${30 + Math.random() * 40}%`,
-                `${25 + Math.random() * 50}%`,
-                `${10 + (finalSlot * 4.5)}%`,
+                `${26 + Math.random() * 48}%`,
+                `${22 + Math.random() * 56}%`,
+                `${18 + Math.random() * 64}%`,
+                `${10 + (finalSlot * 4.3)}%`,
               ],
             }}
             transition={{
-              duration: 2.5,
+              duration: 3,
               ease: 'easeIn',
             }}
             onAnimationComplete={() => onBallLanded && onBallLanded(finalSlot)}
@@ -114,7 +120,7 @@ const PlinkoBoard369 = ({
           ) : (
             <>
               <Sparkles className="w-6 h-6 mr-2" />
-              Launch Ball • 1 PLS
+              Launch Ball • {ENTRY_FEE_PLS.toLocaleString()} PLS
             </>
           )}
         </Button>
