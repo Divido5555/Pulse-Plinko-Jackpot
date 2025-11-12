@@ -232,6 +232,10 @@ const PlinkoGame369 = () => {
               onBallLanded={handleBallLanded}
               miniAmountPLS={localJackpots.mini.toFixed(2)}
               finalSlot={finalSlot}
+              onJackpotIndicesChange={(mini, main) => {
+                setMiniIndex(mini);
+                setMainIndex(main);
+              }}
             />
 
             {/* How to Play */}
