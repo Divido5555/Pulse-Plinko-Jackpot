@@ -269,7 +269,9 @@
 }
 
 .slot .logo {
-  font-size: 28px;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
   opacity: 0.95;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
   margin-bottom: 4px;
