@@ -111,7 +111,7 @@ const PlinkoGame369 = () => {
     
     try {
       // Determine outcome
-      const prizeSlots = { 1: 1.1, 5: 1.5, 9: 2.0, 13: 3.0, 17: 5.0 };
+      const prizeSlots = { 1: 1.1, 6: 1.5, 11: 2.0, 15: 3.0, 19: 5.0 };
       const payout = prizeSlots[landedSlot] || 0;
       
       // Check if ball landed on jackpot slots AND passes probability check
