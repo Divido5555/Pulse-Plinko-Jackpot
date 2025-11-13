@@ -76,14 +76,13 @@ const PlinkoBoard369 = ({
     
     // Add small horizontal blockers ABOVE first row of pegs
     const blockers = [];
-    const blockerY = 8; // Position at top, before pegs start
     
     // Left blocker: starts at left margin (x=0), extends to about 2nd column
     const leftBlockerWidth = startX + (2 * horizontalSpacing); // Extends to 2nd peg position
     blockers.push({
       id: 'blocker-left',
       x: 0, // Start at left edge
-      y: blockerY,
+      y: blockerY, // Use blockerY defined earlier
       width: leftBlockerWidth,
       side: 'left',
     });
@@ -94,7 +93,7 @@ const PlinkoBoard369 = ({
     blockers.push({
       id: 'blocker-right',
       x: rightBlockerStart,
-      y: blockerY,
+      y: blockerY, // Use blockerY defined earlier
       width: rightBlockerWidth,
       side: 'right',
     });
