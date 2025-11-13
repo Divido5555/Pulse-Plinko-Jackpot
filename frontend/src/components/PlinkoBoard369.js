@@ -146,6 +146,28 @@ const PlinkoBoard369 = ({
     startPuckAnimation();
   };
 
+  const checkBlockerCollision = (x, y, vx, vy) => {
+    const blockerWidth = 2; // Width of blocker collision area
+    
+    for (const blocker of blockerPositions) {
+      // Check if puck is within blocker's vertical range and near its x position
+      if (y >= blocker.y && y <= blocker.y + blocker.height) {
+        const dx = Math.abs(x - blocker.x);
+        
+        if (dx < blockerWidth) {
+          // Bounce away from blocker
+          const bounceDirection = x < blocker.x ? -1 : 1;
+          return {
+            blocker,
+            newVx: bounceDirection * Math.abs(vx) * 0.8,
+            newVy: vy * 0.8,
+          };
+        }
+      }
+    }
+    return null;
+  };
+
   const checkPegCollision = (x, y, vx, vy) => {
     const collisionRadius = 2.5; // Increased collision detection radius
     
