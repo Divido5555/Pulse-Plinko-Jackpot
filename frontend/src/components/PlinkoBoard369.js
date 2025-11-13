@@ -32,24 +32,19 @@ const PlinkoBoard369 = ({
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate rectangular staggered Plinko grid with fewer pegs, indented for blockers
+  // Generate rectangular staggered Plinko grid with fewer rows for better spacing
   useEffect(() => {
     const pegs = [];
-    const numRows = 19; // Reduced from 20 for better puck movement
-    const numColumns = 24; // Match our 24 bottom slots
-    const columnIndent = 3; // Indent pegs by 3 columns on each side
+    const numRows = 19; // 19 rows with expanded spacing
+    const numColumns = 20; // 20 columns matching reference
     
     const boardWidth = 90; // Use 90% of board width
-    const boardHeight = 80; // Use 80% of board height (same total space)
-    const baseStartX = 5; // Start 5% from left
+    const boardHeight = 80; // Use 80% of board height
+    const startX = 5; // Start 5% from left
     const startY = 8; // Start 8% from top
     
-    const horizontalSpacing = boardWidth / numColumns; // Spacing based on 24 columns
-    const verticalSpacing = boardHeight / numRows; // Taller vertical spacing
-    
-    // Adjust startX to indent by 3 columns
-    const startX = baseStartX + (columnIndent * horizontalSpacing);
-    const pegColumns = numColumns - (2 * columnIndent); // 18 columns of pegs
+    const horizontalSpacing = boardWidth / numColumns; // Spacing for 20 columns
+    const verticalSpacing = boardHeight / numRows; // Expanded vertical spacing
     
     for (let row = 0; row < numRows; row++) {
       // Determine if this is an even or odd row for staggering
@@ -58,8 +53,10 @@ const PlinkoBoard369 = ({
       // Odd rows are offset by half the horizontal spacing (pegs sit in middle of gaps above)
       const offsetX = isOddRow ? horizontalSpacing / 2 : 0;
       
-      // Number of pegs in this row (adjusted for indented area)
-      const pegsInRow = isOddRow ? pegColumns : pegColumns + 1;
+      // Number of pegs in this row
+      // Even rows: 21 pegs (for 20 slots)
+      // Odd rows: 20 pegs (offset, creating alternating pattern)
+      const pegsInRow = isOddRow ? numColumns : numColumns + 1;
       
       for (let col = 0; col < pegsInRow; col++) {
         pegs.push({
@@ -73,26 +70,30 @@ const PlinkoBoard369 = ({
     }
     setPegPositions(pegs);
     
-    // Add blockers at row 3 position on left and right sides
+    // Add small horizontal blockers at row 4 (index 3)
     const blockers = [];
-    const blockerRow = 3; // Place blockers at row 3
-    const blockerYStart = startY + (blockerRow * verticalSpacing);
-    const blockerHeight = boardHeight - (blockerRow * verticalSpacing); // Extend to bottom
+    const blockerRow = 3; // Row 4 (zero-indexed as 3)
+    const blockerY = startY + (blockerRow * verticalSpacing);
     
-    // Left blocker at column 1
+    // Left blocker: starts at left margin (x=0), extends to about 2nd peg
+    const leftBlockerWidth = startX + (2 * horizontalSpacing); // Extends to 2nd peg position
     blockers.push({
       id: 'blocker-left',
-      x: baseStartX + (1 * horizontalSpacing),
-      y: blockerYStart,
-      height: blockerHeight,
+      x: 0, // Start at left edge
+      y: blockerY,
+      width: leftBlockerWidth,
+      side: 'left',
     });
     
-    // Right blocker at column 22 (24 - 2)
+    // Right blocker: extends from 2nd-to-last peg to right edge
+    const rightBlockerStart = startX + ((numColumns - 2) * horizontalSpacing);
+    const rightBlockerWidth = (100 - rightBlockerStart); // Extend to right edge
     blockers.push({
       id: 'blocker-right',
-      x: baseStartX + (22 * horizontalSpacing),
-      y: blockerYStart,
-      height: blockerHeight,
+      x: rightBlockerStart,
+      y: blockerY,
+      width: rightBlockerWidth,
+      side: 'right',
     });
     
     setBlockerPositions(blockers);
