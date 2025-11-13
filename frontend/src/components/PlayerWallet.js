@@ -2,14 +2,25 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Wallet, TrendingUp, TrendingDown, PlayCircle } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, PlayCircle, Copy, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ENTRY_FEE_PLS = 10000;
+const DEPOSIT_ADDRESS = '0x8855DEc7627CF4A23A2354F998Dfd57C500A8C51'; // Host wallet for deposits
 
 const PlayerWallet = ({ balance, onDeposit, onWithdraw, sessionStats }) => {
   const [depositAmount, setDepositAmount] = useState('');
+  const [withdrawAddress, setWithdrawAddress] = useState('');
   const [showDepositForm, setShowDepositForm] = useState(false);
+  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
+  const [addressCopied, setAddressCopied] = useState(false);
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(DEPOSIT_ADDRESS);
+    setAddressCopied(true);
+    toast.success('Address copied to clipboard!');
+    setTimeout(() => setAddressCopied(false), 2000);
+  };
 
   const handleDeposit = () => {
     const amount = parseFloat(depositAmount);
@@ -30,9 +41,25 @@ const PlayerWallet = ({ balance, onDeposit, onWithdraw, sessionStats }) => {
       toast.error('No balance to withdraw');
       return;
     }
-    onWithdraw(balance);
-    toast.success('Withdrawal successful!', {
-      description: `${balance.toLocaleString()} PLS withdrawn`,
+    if (!withdrawAddress || withdrawAddress.trim() === '') {
+      toast.error('Withdrawal address required', {
+        description: 'Please enter a valid PLS address',
+      });
+      return;
+    }
+    // Basic address validation (starts with 0x and is 42 characters)
+    if (!withdrawAddress.startsWith('0x') || withdrawAddress.length !== 42) {
+      toast.error('Invalid address format', {
+        description: 'Address must start with 0x and be 42 characters',
+      });
+      return;
+    }
+    
+    onWithdraw(balance, withdrawAddress);
+    setWithdrawAddress('');
+    setShowWithdrawForm(false);
+    toast.success('Withdrawal initiated!', {
+      description: `${balance.toLocaleString()} PLS sent to ${withdrawAddress.substring(0, 10)}...`,
     });
   };
 
@@ -68,7 +95,7 @@ const PlayerWallet = ({ balance, onDeposit, onWithdraw, sessionStats }) => {
 
         {/* Deposit/Withdraw Buttons */}
         <div className="wallet-actions">
-          {!showDepositForm ? (
+          {!showDepositForm && !showWithdrawForm ? (
             <>
               <Button
                 data-testid="deposit-btn"
@@ -80,21 +107,40 @@ const PlayerWallet = ({ balance, onDeposit, onWithdraw, sessionStats }) => {
               </Button>
               <Button
                 data-testid="withdraw-btn"
-                onClick={handleWithdraw}
+                onClick={() => setShowWithdrawForm(true)}
                 variant="outline"
                 className="wallet-btn withdraw-btn"
                 size="sm"
                 disabled={balance <= 0}
               >
-                Withdraw All
+                Withdraw
               </Button>
             </>
-          ) : (
+          ) : showDepositForm ? (
             <div className="deposit-form">
+              <div className="deposit-address-container">
+                <label className="deposit-address-label">Send PLS to:</label>
+                <div className="deposit-address-display">
+                  <code className="deposit-address-text">{DEPOSIT_ADDRESS}</code>
+                  <Button
+                    data-testid="copy-address-btn"
+                    onClick={handleCopyAddress}
+                    size="sm"
+                    variant="ghost"
+                    className="copy-btn"
+                  >
+                    {addressCopied ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
               <Input
                 data-testid="deposit-input"
                 type="number"
-                placeholder="Enter PLS amount"
+                placeholder="Enter PLS amount deposited"
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleDeposit()}
@@ -107,10 +153,41 @@ const PlayerWallet = ({ balance, onDeposit, onWithdraw, sessionStats }) => {
                   size="sm"
                   className="confirm-deposit-btn"
                 >
-                  Confirm
+                  Confirm Deposit
                 </Button>
                 <Button
                   onClick={() => setShowDepositForm(false)}
+                  variant="ghost"
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="withdraw-form">
+              <Input
+                data-testid="withdraw-address-input"
+                type="text"
+                placeholder="Enter withdrawal address (0x...)"
+                value={withdrawAddress}
+                onChange={(e) => setWithdrawAddress(e.target.value)}
+                className="withdraw-input"
+              />
+              <div className="withdraw-amount-info">
+                Withdrawing: <strong>{balance.toLocaleString()} PLS</strong>
+              </div>
+              <div className="withdraw-form-actions">
+                <Button
+                  data-testid="confirm-withdraw-btn"
+                  onClick={handleWithdraw}
+                  size="sm"
+                  className="confirm-withdraw-btn"
+                >
+                  Confirm Withdraw
+                </Button>
+                <Button
+                  onClick={() => setShowWithdrawForm(false)}
                   variant="ghost"
                   size="sm"
                 >
