@@ -119,8 +119,21 @@ const PlayerWallet = ({ balance, onDeposit, onWithdraw, sessionStats }) => {
             </>
           ) : showDepositForm ? (
             <div className="deposit-form">
+              <div className="deposit-qr-container">
+                <div className="qr-code-wrapper">
+                  <QRCodeSVG 
+                    value={DEPOSIT_ADDRESS}
+                    size={160}
+                    level="H"
+                    includeMargin={true}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                  />
+                </div>
+                <div className="qr-label">Scan to deposit PLS</div>
+              </div>
               <div className="deposit-address-container">
-                <label className="deposit-address-label">Send PLS to:</label>
+                <label className="deposit-address-label">Or send PLS to:</label>
                 <div className="deposit-address-display">
                   <code className="deposit-address-text">{DEPOSIT_ADDRESS}</code>
                   <Button
