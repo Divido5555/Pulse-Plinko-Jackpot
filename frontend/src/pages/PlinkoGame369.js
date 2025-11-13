@@ -106,6 +106,9 @@ const PlinkoGame369 = () => {
   };
 
   const handleBallLanded = async (landedSlot) => {
+    // Clear banner first
+    setBanner(null);
+    
     try {
       // Determine outcome
       const prizeSlots = { 1: 1.1, 5: 1.5, 9: 2.0, 13: 3.0, 17: 5.0 };
@@ -129,64 +132,71 @@ const PlinkoGame369 = () => {
         wins: isWin ? prev.wins + 1 : prev.wins,
       }));
 
-      // Show result banner AFTER ball lands
-      if (mainHit) {
-        // Main Jackpot: Pay 60%, keep 40% for reset/fees
-        winAmount = localJackpots.main * 0.60;
-        setPlayerBalance(prev => prev + winAmount);
-        setLocalJackpots(prev => ({
-          ...prev,
-          main: prev.main * 0.40, // 40% stays (will be split: 10% burn, 10% host, 10% dev, 10% reset)
-        }));
-        setSessionStats(prev => ({
-          ...prev,
-          totalWinnings: prev.totalWinnings + winAmount,
-        }));
-        setBanner({ kind: 'main', text: 'MAIN JACKPOT!!!' });
-        toast.success('MAIN JACKPOT WON!', {
-          description: `You won ${winAmount.toLocaleString()} PLS!`,
-        });
-      } else if (miniHit) {
-        // Mini Jackpot: Pay 80%, keep 20% for reset/fees
-        winAmount = localJackpots.mini * 0.80;
-        setPlayerBalance(prev => prev + winAmount);
-        setLocalJackpots(prev => ({
-          ...prev,
-          mini: prev.mini * 0.20, // 20% stays (will be split: 10% host, 10% reset)
-        }));
-        setSessionStats(prev => ({
-          ...prev,
-          totalWinnings: prev.totalWinnings + winAmount,
-        }));
-        setBanner({ kind: 'mini', text: 'MINI JACKPOT!' });
-        toast.success('MINI JACKPOT WON!', {
-          description: `You won ${winAmount.toLocaleString()} PLS!`,
-        });
-      } else if (payout > 0) {
-        // Regular win from base prize pool (32% of entries)
-        winAmount = ENTRY_FEE_PLS * payout;
-        setPlayerBalance(prev => prev + winAmount);
-        setSessionStats(prev => ({
-          ...prev,
-          totalWinnings: prev.totalWinnings + winAmount,
-        }));
-        setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
-        toast.success(`You won ${payout}x!`, {
-          description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
-        });
-      } else if (landedOnMini || landedOnMain) {
-        // Landed on jackpot slot but didn't win - close call!
-        setBanner({ kind: 'lose', text: 'So close! Try again!' });
-        toast.info('Almost hit the jackpot!', {
-          description: `Landed on ${landedOnMini ? 'MINI' : 'MAIN'} slot but didn't trigger. Keep playing!`,
-        });
-      } else {
-        // Loss - jackpots already increased
-        setBanner({ kind: 'lose', text: 'Try again!' });
-        toast.info('Try again!', {
-          description: `Ball landed in slot ${landedSlot}. Jackpots are growing!`,
-        });
-      }
+      // Show result banner AFTER ball lands (with small delay)
+      setTimeout(() => {
+        if (mainHit) {
+          // Main Jackpot: Pay 60%, keep 40% for reset/fees
+          winAmount = localJackpots.main * 0.60;
+          setPlayerBalance(prev => prev + winAmount);
+          setLocalJackpots(prev => ({
+            ...prev,
+            main: prev.main * 0.40,
+          }));
+          setSessionStats(prev => ({
+            ...prev,
+            totalWinnings: prev.totalWinnings + winAmount,
+          }));
+          setBanner({ kind: 'main', text: 'MAIN JACKPOT!!!' });
+          toast.success('MAIN JACKPOT WON!', {
+            description: `You won ${winAmount.toLocaleString()} PLS!`,
+          });
+        } else if (miniHit) {
+          // Mini Jackpot: Pay 80%, keep 20% for reset/fees
+          winAmount = localJackpots.mini * 0.80;
+          setPlayerBalance(prev => prev + winAmount);
+          setLocalJackpots(prev => ({
+            ...prev,
+            mini: prev.mini * 0.20,
+          }));
+          setSessionStats(prev => ({
+            ...prev,
+            totalWinnings: prev.totalWinnings + winAmount,
+          }));
+          setBanner({ kind: 'mini', text: 'MINI JACKPOT!' });
+          toast.success('MINI JACKPOT WON!', {
+            description: `You won ${winAmount.toLocaleString()} PLS!`,
+          });
+        } else if (payout > 0) {
+          // Regular win from base prize pool
+          winAmount = ENTRY_FEE_PLS * payout;
+          setPlayerBalance(prev => prev + winAmount);
+          setSessionStats(prev => ({
+            ...prev,
+            totalWinnings: prev.totalWinnings + winAmount,
+          }));
+          setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
+          toast.success(`You won ${payout}x!`, {
+            description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
+          });
+        } else if (landedOnMini || landedOnMain) {
+          // Landed on jackpot slot but didn't win - close call!
+          setBanner({ kind: 'lose', text: 'So close! Try again!' });
+          toast.info('Almost hit the jackpot!', {
+            description: `Landed on ${landedOnMini ? 'MINI' : 'MAIN'} slot but didn't trigger. Keep playing!`,
+          });
+        } else {
+          // Loss - jackpots already increased
+          setBanner({ kind: 'lose', text: 'Try again!' });
+          toast.info('Try again!', {
+            description: `Ball landed in slot ${landedSlot}. Jackpots are growing!`,
+          });
+        }
+        
+        // Auto-clear banner after 2 seconds
+        setTimeout(() => {
+          setBanner(null);
+        }, 2000);
+      }, 300);
 
       // Record the play
       await axios.post(`${API}/game/record`, {
@@ -196,18 +206,11 @@ const PlinkoGame369 = () => {
         is_jackpot: miniHit || mainHit,
       });
 
-      // Clear banner after delay
-      setTimeout(() => {
-        setBanner(null);
-        setIsBallFalling(false);
-      }, 2000);
-
       // Refresh state
       fetchGameState();
       fetchStats();
     } catch (error) {
       console.error('Error handling ball landed:', error);
-      setIsBallFalling(false);
     }
   };
 
