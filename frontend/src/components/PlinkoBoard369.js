@@ -148,22 +148,20 @@ const PlinkoBoard369 = ({
   };
 
   const checkBlockerCollision = (x, y, vx, vy) => {
-    const blockerWidth = 2; // Width of blocker collision area
+    const blockerHeight = 3; // Height of horizontal blocker collision area
     
     for (const blocker of blockerPositions) {
-      // Check if puck is within blocker's vertical range and near its x position
-      if (y >= blocker.y && y <= blocker.y + blocker.height) {
-        const dx = Math.abs(x - blocker.x);
-        
-        if (dx < blockerWidth) {
-          // Bounce away from blocker
-          const bounceDirection = x < blocker.x ? -1 : 1;
-          return {
-            blocker,
-            newVx: bounceDirection * Math.abs(vx) * 0.8,
-            newVy: vy * 0.8,
-          };
-        }
+      // Check if puck is within blocker's horizontal range and near its y position
+      const isInHorizontalRange = x >= blocker.x && x <= (blocker.x + blocker.width);
+      const dy = Math.abs(y - blocker.y);
+      
+      if (isInHorizontalRange && dy < blockerHeight) {
+        // Bounce away from blocker (vertical bounce)
+        return {
+          blocker,
+          newVx: vx * 0.7 + (Math.random() - 0.5) * 0.5,
+          newVy: -Math.abs(vy) * 0.6, // Bounce upward/away
+        };
       }
     }
     return null;
