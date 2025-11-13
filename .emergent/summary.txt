@@ -1,0 +1,82 @@
+<analysis>
+The project began with a user request for an income-generating application, initially exploring trading bots and flash loans. The direction quickly pivoted from a Pionex API-based trading dashboard to a decentralized, pay-to-play Plinko game on the PulseChain blockchain. The development process has been highly iterative, driven by detailed and evolving user feedback.
+
+The initial version of the Plinko game was built with a basic UI and game logic. However, the user provided a comprehensive frontend upgrade pack, leading to a major redesign with a futuristic Pulse369 DAO theme, including a starfield background, floating token logos, and new UI components.
+
+Subsequent development cycles have focused on refining the user experience and game physics. This involved numerous changes to the game board layout, transitioning from emojis to real token logos, implementing a player wallet with deposit/withdraw functionality (including a QR code), and, most significantly, a complete overhaul of the Plinko board mechanics. The simple drop was replaced with a physics-based system featuring a user-draggable puck, realistic bounces, and individual peg-collision feedback. The most recent work involves correcting the peg layout to ensure a natural, non-linear puck fall, based on a pattern provided by the user.
+</analysis>
+
+<product_requirements>
+The goal is to build a decentralized Pulse369 DAO • PulseChain Plinko Jackpot game. It's a pay-to-play game designed to attract users and advertise the PulseChain ecosystem.
+
+**Core Gameplay:**
+- **Entry Fee:** 10,000 PLS per game.
+- **Mechanics:** Players drag a puck (featuring the Pulse369 DAO logo) to one of four starting zones and release it. The puck falls through a 20-row staggered peg board with realistic physics, with pegs flashing on impact.
+- **Payouts:** The puck lands in one of 24 slots at the bottom, which determine the outcome (win, lose, or jackpot).
+
+**Tokenomics & Jackpots:**
+- **Jackpot Growth:** Each play contributes to a Main Jackpot (50%) and a Mini Jackpot (15%).
+- **Jackpot Wins:** Winning is based on a low-probability random check, not just landing on a visual badge. The moving MINI and MAIN badges are visual indicators.
+- **Payout Splits:** Main Jackpot win (60% to winner), Mini Jackpot win (80% to winner). The remainder is used for reset, host/dev fees, and burn.
+
+**Frontend & UX:**
+- **Theme:** A futuristic, dark starfield theme with floating token logos.
+- **Player Wallet:** Displays PLS balance, tracks session stats (P/L, games played), and facilitates deposits (via a scannable QR code and wallet address) and withdrawals.
+- **Demo Mode:** Starts users with 100,000 PLS for immediate testing.
+</product_requirements>
+
+<key_technical_concepts>
+- **Frontend:** React, JavaScript (ES6+), CSS for complex animations and layouts.
+- **Backend:** FastAPI (Python) to serve the frontend and provide API endpoints.
+- **Blockchain:** Solidity for the smart contract (),  for backend interaction.
+- **Game Physics:** Custom JavaScript logic simulating gravity, bounce, and collision detection within the Plinko board component.
+- **UI Libraries:** Shadcn UI components and  for the deposit QR code.
+</key_technical_concepts>
+
+<code_architecture>
+The application follows a full-stack architecture with a React frontend, a FastAPI backend, and a Solidity smart contract.
+
+**Directory Structure:**
+
+
+**Key File Analysis:**
+
+- ****
+  - **Importance:** This file contains the core on-chain logic for the Plinko game, including prize distribution, jackpot funding, and payout rules. It is the decentralized heart of the application.
+  - **Changes:** Created based on the user's detailed tokenomics specifications. It has not been deployed yet.
+
+- ****
+  - **Importance:** This is the main parent component that orchestrates the entire game. It manages the application's primary state, including player balance, jackpot amounts, game status (playing, idle), and session statistics. It passes state and callbacks down to child components like the  and .
+  - **Changes:** Heavily modified to handle the complex state logic required for the physics-based game, including managing the start and end of a game round, calculating jackpot growth, and triggering result banners.
+
+- ****
+  - **Importance:** This is the most complex and frequently modified component. It is responsible for rendering the entire interactive game area: the draggable puck, the pegs, and the prize slots. It contains the custom physics engine for the puck's movement, including gravity, bounce logic, and collision detection with individual pegs and walls.
+  - **Changes:** Has undergone multiple major rewrites. It evolved from a simple grid to a physics-driven simulation. Recent changes added a draggable puck, individual peg flash on impact, and expanded the board to 14 rows and 24 slots. The last change was to implement a properly staggered peg layout.
+
+- ****
+  - **Importance:** Manages all user balance and session-related UI. It provides functionality for players to deposit funds (via a displayed address and QR code) and withdraw them. It also tracks session-specific data like games played, wins, and profit/loss.
+  - **Changes:** Created to address the user's request for balance tracking. It was later enhanced to include deposit/withdrawal forms and a QR code for easy deposits.
+
+- ****
+  - **Importance:** Contains all the custom styling for the Pulse369 DAO theme, including the starfield background, floating token animations, peg and slot styles, and the custom styling for the draggable puck.
+  - **Changes:** Created and expanded to implement the user's specific visual requirements, moving away from the initial generic design.
+</code_architecture>
+
+<pending_tasks>
+- **Smart Contract Deployment:** The  contract is written but has not been deployed to the PulseChain network.
+- **Frontend-Contract Integration:** The frontend is currently running in a demo mode with mock data. It needs to be integrated with a live wallet (e.g., MetaMask/Wagmi) to interact with the deployed smart contract for real transactions.
+- **Production Deployment:** Neither the frontend nor the backend is deployed to a production environment.
+- **Version Control:** The code has not been pushed to a Git repository.
+</pending_tasks>
+
+<current_work>
+The immediate task is a critical fix for the game's core mechanic. The user pointed out that the Plinko board's pegs were not properly staggered, allowing the puck to fall straight through without bouncing, which ruins the game's suspense and randomness.
+
+The user provided a visual pattern for a correct, pyramid-like Plinko board and requested that it be extended to 20 rows. The previous AI engineer acknowledged this and was in the process of rewriting the  component to generate this new, correctly staggered 20-row peg layout. This involves recalculating the positions of every peg to ensure a natural, bouncing path for the puck, which is essential for the intended gameplay experience. The physics logic for collision detection and puck movement will need to be applied to this new peg structure.
+
+The current state of the application is a visually advanced but mechanically flawed demo. The UI, wallet system, and jackpot-tracking logic are in place, but the central gameplay experience is broken due to the incorrect peg layout.
+</current_work>
+
+<optional_next_step>
+I will recreate the  component to generate a 20-row, properly staggered peg layout, as per the user's provided pattern, to ensure the puck bounces naturally.
+</optional_next_step>

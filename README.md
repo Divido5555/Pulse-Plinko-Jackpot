@@ -39,8 +39,8 @@ Per $1 play:
 ## 🚀 Quick Start
 
 ### Access the Game
-- **Game**: https://flashloan-profit.preview.emergentagent.com
-- **Admin Dashboard**: https://flashloan-profit.preview.emergentagent.com/admin
+- **Game**: https://plinko-jackpot.preview.emergentagent.com
+- **Admin Dashboard**: https://plinko-jackpot.preview.emergentagent.com/admin
 
 ### Smart Contract
 Located at `/contracts/PlinkoGame.sol`
