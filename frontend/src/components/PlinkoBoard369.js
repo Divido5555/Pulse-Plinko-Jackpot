@@ -42,12 +42,13 @@ const PlinkoBoard369 = ({
     const boardHeight = 80; // Use 80% of board height
     const startX = 5; // Start 5% from left
     
-    // Blockers are positioned at the top, then pegs start below them
-    const blockerHeight = 3; // Height space for blockers at top (in %)
-    const pegStartY = 8 + blockerHeight; // Pegs start after blocker space
+    // Blockers are positioned at the top, then pegs start well below them
+    const blockerY = 8; // Blocker position
+    const gapAfterBlocker = 5; // Gap of one row height between blockers and pegs
+    const pegStartY = blockerY + gapAfterBlocker; // Pegs start one row below blockers
     
     const horizontalSpacing = boardWidth / numColumns; // Spacing for 20 columns
-    const verticalSpacing = (boardHeight - blockerHeight) / numRows; // Spacing adjusted for blocker space
+    const verticalSpacing = (boardHeight - gapAfterBlocker) / numRows; // Spacing adjusted for gap
     
     for (let row = 0; row < numRows; row++) {
       // Determine if this is an even or odd row for staggering
