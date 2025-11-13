@@ -138,14 +138,20 @@ const PlinkoBoard369 = ({
     const x = ((clientX - rect.left) / rect.width) * 100;
     const y = ((clientY - rect.top) / rect.height) * 100;
     
-    // Restrict puck to safe area (not in blocked columns 1 and 20)
-    // Allow dragging between approximately columns 2-19
-    const minX = 12; // Just past left blocker
-    const maxX = 88; // Just before right blocker
+    // Restrict puck to columns 2-19 only (simulating bumper blocking)
+    // Calculate exact column boundaries based on 20 columns
+    const boardWidth = 90;
+    const startX = 5;
+    const columnWidth = boardWidth / 20;
+    
+    // Column 2 starts at: startX + (1 * columnWidth) + (columnWidth/2) to center
+    const minX = startX + (1.5 * columnWidth); // Middle of column 2
+    // Column 19 ends at: startX + (19 * columnWidth) - (columnWidth/2)
+    const maxX = startX + (18.5 * columnWidth); // Middle of column 19
     
     setPuckPosition({ 
       x: Math.max(minX, Math.min(maxX, x)), 
-      y: Math.max(0, Math.min(10, y)) // Allow slightly more vertical drag space
+      y: Math.max(0, Math.min(12, y)) // Allow dragging in top area
     });
   };
 
