@@ -30,36 +30,39 @@ const PlinkoBoard369 = ({
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate proper staggered Plinko pyramid (20 rows, matching reference image)
+  // Generate rectangular staggered Plinko grid (like reference image)
   useEffect(() => {
     const pegs = [];
     const numRows = 20;
-    const rowSpacing = 4.0; // Vertical spacing between rows
-    const startY = 8; // Start position from top
+    const numColumns = 24; // Match our 24 bottom slots
     
-    // Base horizontal spacing (distance between pegs in the widest row)
-    const basePegSpacing = 3.8;
+    const boardWidth = 90; // Use 90% of board width
+    const boardHeight = 80; // Use 80% of board height
+    const startX = 5; // Start 5% from left
+    const startY = 8; // Start 8% from top
+    
+    const horizontalSpacing = boardWidth / numColumns; // Space between columns
+    const verticalSpacing = boardHeight / numRows; // Space between rows
     
     for (let row = 0; row < numRows; row++) {
-      // Start with 5 pegs at top, add 1 per row to reach 24 at bottom
-      const numPegsInRow = 5 + row;
+      // Determine if this is an even or odd row for staggering
+      const isOddRow = row % 2 === 1;
       
-      // Calculate the total width this row should span
-      const rowWidth = (numPegsInRow - 1) * basePegSpacing;
+      // Odd rows are offset by half the horizontal spacing (pegs sit in middle of gaps above)
+      const offsetX = isOddRow ? horizontalSpacing / 2 : 0;
       
-      // Center the row horizontally
-      const startX = 50 - (rowWidth / 2);
+      // Number of pegs in this row
+      // Even rows: 25 pegs (for 24 slots)
+      // Odd rows: 24 pegs (offset, creating alternating pattern)
+      const pegsInRow = isOddRow ? numColumns : numColumns + 1;
       
-      // Stagger: even rows align normally, odd rows shift by half spacing
-      const staggerOffset = (row % 2 === 1) ? (basePegSpacing / 2) : 0;
-      
-      for (let i = 0; i < numPegsInRow; i++) {
+      for (let col = 0; col < pegsInRow; col++) {
         pegs.push({
-          id: `${row}-${i}`,
-          x: startX + staggerOffset + (i * basePegSpacing),
-          y: startY + (row * rowSpacing),
+          id: `${row}-${col}`,
+          x: startX + offsetX + (col * horizontalSpacing),
+          y: startY + (row * verticalSpacing),
           row,
-          col: i,
+          col,
         });
       }
     }
