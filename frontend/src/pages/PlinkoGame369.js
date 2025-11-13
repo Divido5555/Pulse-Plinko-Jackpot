@@ -251,19 +251,15 @@ const PlinkoGame369 = () => {
               }}
             />
 
-            {/* How to Play */}
-            <Card className="info-card">
-              <CardHeader>
-                <CardTitle>How to Play</CardTitle>
-              </CardHeader>
-              <CardContent className="info-content">
-                <p><strong>• Entry:</strong> {ENTRY_FEE_PLS.toLocaleString()} PLS per game</p>
-                <p><strong>• Winners:</strong> Slots 1, 5, 9, 13, 17 (PLS/PLSX/HEX/INC/PROVEX)</p>
-                <p><strong>• Mini Jackpot:</strong> Moves to random slot each play</p>
-                <p><strong>• Main Jackpot:</strong> Ultra-rare, life-changing prize</p>
-                <p><strong>• Ecosystem:</strong> Every play supports PulseChain tokens</p>
-              </CardContent>
-            </Card>
+            {/* How to Play - Compact */}
+            <div className="info-card-compact">
+              <div className="info-compact-title">How to Play</div>
+              <div className="info-compact-content">
+                <span><strong>Entry:</strong> 10,000 PLS</span> • 
+                <span><strong>Wins:</strong> Slots 1,5,9,13,17</span> • 
+                <span><strong>Jackpots:</strong> Land on badges + pass odds</span>
+              </div>
+            </div>
           </div>
 
           {/* Stats Sidebar */}
