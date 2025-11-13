@@ -30,30 +30,33 @@ const PlinkoBoard369 = ({
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate proper triangular Plinko peg layout (like real Plinko board)
+  // Generate proper staggered Plinko pyramid (20 rows, matching reference image)
   useEffect(() => {
     const pegs = [];
-    const numRows = 20; // Extended to 20 rows as requested
-    const rowSpacing = 4.2; // Vertical spacing between rows
-    const startY = 7; // Start position from top
+    const numRows = 20;
+    const rowSpacing = 4.0; // Vertical spacing between rows
+    const startY = 8; // Start position from top
+    
+    // Base horizontal spacing (distance between pegs in the widest row)
+    const basePegSpacing = 3.8;
     
     for (let row = 0; row < numRows; row++) {
-      // Number of pegs increases: start with 3 at top, add 1 every row
-      const numPegsInRow = 3 + row;
-      const isOddRow = row % 2 === 1;
+      // Start with 5 pegs at top, add 1 per row to reach 24 at bottom
+      const numPegsInRow = 5 + row;
       
-      // Calculate spacing based on number of pegs to fit them across width
-      const totalWidth = 85; // Use 85% of width
-      const pegSpacing = totalWidth / (numPegsInRow + 1);
+      // Calculate the total width this row should span
+      const rowWidth = (numPegsInRow - 1) * basePegSpacing;
       
-      // Offset for staggered pattern
-      const baseOffsetX = 7.5; // Start offset from left
-      const staggerOffset = isOddRow ? pegSpacing / 2 : 0;
+      // Center the row horizontally
+      const startX = 50 - (rowWidth / 2);
+      
+      // Stagger: even rows align normally, odd rows shift by half spacing
+      const staggerOffset = (row % 2 === 1) ? (basePegSpacing / 2) : 0;
       
       for (let i = 0; i < numPegsInRow; i++) {
         pegs.push({
           id: `${row}-${i}`,
-          x: baseOffsetX + staggerOffset + ((i + 1) * pegSpacing),
+          x: startX + staggerOffset + (i * basePegSpacing),
           y: startY + (row * rowSpacing),
           row,
           col: i,
