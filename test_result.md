@@ -105,7 +105,7 @@
 user_problem_statement: "Fix Plinko board peg layout - pegs were not properly staggered, causing puck to fall straight through without bouncing. Need to implement 20-row pyramid pattern based on reference image."
 
 frontend:
-  - task: "Implement 20-row rectangular staggered peg grid"
+  - task: "Implement 19-row rectangular staggered peg grid with optimized spacing"
     implemented: true
     working: true
     file: "frontend/src/components/PlinkoBoard369.js"
@@ -118,7 +118,10 @@ frontend:
         comment: "Initial attempt: Created pyramid layout - this was incorrect"
       - working: true
         agent: "main"
-        comment: "Corrected to rectangular grid layout matching reference image. Board now has 20 rows of pegs arranged in rectangular staggered pattern. Even rows have 25 pegs, odd rows have 24 pegs offset by half spacing. This creates the classic Plinko board where each peg sits in the middle of the gap above it. Puck now bounces naturally through the grid."
+        comment: "Corrected to rectangular grid layout matching reference image. 20 rows of pegs."
+      - working: true
+        agent: "main"
+        comment: "Optimized to 19 rows with increased spacing for more realistic puck flow. Removed top row but used same vertical space by increasing spacing. Even rows have 25 pegs, odd rows have 24 pegs offset by half spacing. Puck has more room to move and bounce naturally."
 
 metadata:
   created_by: "main_agent"
