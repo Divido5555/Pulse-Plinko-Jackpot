@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useRef } from 'react';
 import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
 import { PULSE369_LOGO } from '../config/tokenAssets';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 
-const ENTRY_FEE_PLS = 10000; // 10,000 PLS
+const ENTRY_FEE_PLS = 10000;
+const DROP_ZONES = [0, 5, 10, 15]; // 4 drop zones across the top
 
 const PlinkoBoard369 = ({
   isBallFalling,
@@ -23,29 +23,145 @@ const PlinkoBoard369 = ({
     () => MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)]
   );
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [puckPosition, setPuckPosition] = useState({ x: 50, y: 5 }); // Start centered at top
+  const [dropZone, setDropZone] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationPath, setAnimationPath] = useState([]);
+  const [currentPathIndex, setCurrentPathIndex] = useState(0);
+  const [flashingPegs, setFlashingPegs] = useState([]);
+  const [landedSlot, setLandedSlot] = useState(null);
+  const boardRef = useRef(null);
+
   // Shuffle both badges when not playing
   useEffect(() => {
-    if (!isBallFalling) {
-      // Mini badge
+    if (!isBallFalling && !isAnimating) {
       const miniIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
       setMiniIndex(miniIdx);
       
-      // Main badge - ensure it's different from mini
       let mainIdx;
       do {
         mainIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
       } while (mainIdx === miniIdx);
       setMainIndex(mainIdx);
       
-      // Notify parent of new indices
       if (onJackpotIndicesChange) {
         onJackpotIndicesChange(miniIdx, mainIdx);
       }
     }
-  }, [isBallFalling, onJackpotIndicesChange]);
+  }, [isBallFalling, isAnimating, onJackpotIndicesChange]);
+
+  // Handle puck drag
+  const handlePuckDragStart = (e) => {
+    if (isAnimating || isBallFalling) return;
+    setIsDragging(true);
+  };
+
+  const handlePuckDrag = (e) => {
+    if (!isDragging || !boardRef.current) return;
+    
+    const rect = boardRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    setPuckPosition({ x: Math.max(5, Math.min(95, x)), y: Math.max(0, Math.min(15, y)) });
+  };
+
+  const handlePuckDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    // Determine drop zone (0-3)
+    const zone = Math.floor(puckPosition.x / 25);
+    setDropZone(Math.min(3, Math.max(0, zone)));
+    
+    // Start animation
+    startPuckAnimation(zone);
+  };
+
+  const startPuckAnimation = (zone) => {
+    setIsAnimating(true);
+    setLandedSlot(null); // Clear previous landing
+    
+    // Generate path with peg collisions
+    const path = generatePuckPath(DROP_ZONES[zone]);
+    setAnimationPath(path);
+    setCurrentPathIndex(0);
+  };
+
+  const generatePuckPath = (startX) => {
+    const path = [];
+    let x = startX + Math.random() * 5; // Add randomness
+    
+    // Generate 10 rows of movement
+    for (let row = 0; row < 10; row++) {
+      const y = 10 + (row * 35);
+      
+      // Random horizontal movement (-2 to +2 slots)
+      x += (Math.random() - 0.5) * 8;
+      x = Math.max(2.5, Math.min(17.5, x));
+      
+      path.push({
+        x: (x / 20) * 100,
+        y: (y / 400) * 100,
+        pegRow: row,
+      });
+    }
+    
+    // Final position maps to slot
+    const finalSlotIndex = Math.round(x);
+    path.push({
+      x: (finalSlotIndex / 20) * 100,
+      y: 92,
+      isEnd: true,
+      slot: finalSlotIndex,
+    });
+    
+    return path;
+  };
+
+  // Animate puck along path
+  useEffect(() => {
+    if (isAnimating && currentPathIndex < animationPath.length) {
+      const timeout = setTimeout(() => {
+        const currentPoint = animationPath[currentPathIndex];
+        setPuckPosition({ x: currentPoint.x, y: currentPoint.y });
+        
+        // Flash peg on collision
+        if (currentPoint.pegRow !== undefined) {
+          setFlashingPegs(prev => [...prev, currentPoint.pegRow]);
+          setTimeout(() => {
+            setFlashingPegs(prev => prev.filter(r => r !== currentPoint.pegRow));
+          }, 150);
+        }
+        
+        // Check if at end
+        if (currentPoint.isEnd) {
+          setLandedSlot(currentPoint.slot); // Highlight slot AFTER landing
+          setTimeout(() => {
+            onBallLanded(currentPoint.slot);
+            setIsAnimating(false);
+            setCurrentPathIndex(0);
+            setPuckPosition({ x: 50, y: 5 }); // Reset to top
+          }, 500);
+        } else {
+          setCurrentPathIndex(prev => prev + 1);
+        }
+      }, 250);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isAnimating, currentPathIndex, animationPath, onBallLanded]);
 
   return (
-    <div className="board-frame" data-testid="plinko-board-369">
+    <div 
+      className="board-frame" 
+      data-testid="plinko-board-369"
+      ref={boardRef}
+      onMouseMove={handlePuckDrag}
+      onMouseUp={handlePuckDragEnd}
+      onMouseLeave={handlePuckDragEnd}
+    >
       <div className="mini-banner-top">
         <span className="mini-chip">MINI</span>
         <b>{miniAmountPLS} PLS</b> • 
@@ -58,41 +174,40 @@ const PlinkoBoard369 = ({
         {[...Array(10)].map((_, rowIndex) => (
           <div key={rowIndex} className="peg-row">
             {[...Array(Math.min(20, rowIndex + 5))].map((_, pegIndex) => (
-              <div key={pegIndex} className="peg" />
+              <div 
+                key={pegIndex} 
+                className={`peg ${flashingPegs.includes(rowIndex) ? 'peg-flash' : ''}`}
+              />
             ))}
           </div>
         ))}
 
-        {/* Animated Ball */}
-        {isBallFalling && (
-          <motion.div
-            data-testid="plinko-ball-369"
-            className="plinko-ball"
-            initial={{ top: 0, left: '50%', x: '-50%' }}
-            animate={{
-              top: [0, 40, 80, 120, 160, 200, 240, 280, 320, 350, 370],
-              left: [
-                '50%',
-                `${48 + Math.random() * 4}%`,
-                `${45 + Math.random() * 10}%`,
-                `${42 + Math.random() * 16}%`,
-                `${38 + Math.random() * 24}%`,
-                `${34 + Math.random() * 32}%`,
-                `${30 + Math.random() * 40}%`,
-                `${26 + Math.random() * 48}%`,
-                `${22 + Math.random() * 56}%`,
-                `${18 + Math.random() * 64}%`,
-                `${10 + (finalSlot * 4.3)}%`,
-              ],
+        {/* Draggable Puck */}
+        {(!isAnimating || isDragging) && (
+          <div
+            className={`plinko-ball ${isDragging ? 'dragging' : ''}`}
+            style={{
+              left: `${puckPosition.x}%`,
+              top: `${puckPosition.y}%`,
+              cursor: isDragging ? 'grabbing' : 'grab',
             }}
-            transition={{
-              duration: 3,
-              ease: 'easeIn',
-            }}
-            onAnimationComplete={() => onBallLanded && onBallLanded(finalSlot)}
+            onMouseDown={handlePuckDragStart}
           >
             <img src={PULSE369_LOGO} alt="Pulse369 DAO" className="ball-logo" />
-          </motion.div>
+          </div>
+        )}
+
+        {/* Animating Puck */}
+        {isAnimating && !isDragging && (
+          <div
+            className="plinko-ball animating"
+            style={{
+              left: `${puckPosition.x}%`,
+              top: `${puckPosition.y}%`,
+            }}
+          >
+            <img src={PULSE369_LOGO} alt="Pulse369 DAO" className="ball-logo" />
+          </div>
         )}
       </div>
 
@@ -102,7 +217,7 @@ const PlinkoBoard369 = ({
           <div
             key={s.index}
             data-testid={`slot-${s.index}`}
-            className={`slot ${s.kind} ${finalSlot === s.index && isBallFalling ? 'landed' : ''}`}
+            className={`slot ${s.kind} ${landedSlot === s.index ? 'landed' : ''}`}
           >
             {s.kind === 'win' ? (
               <>
@@ -126,32 +241,13 @@ const PlinkoBoard369 = ({
         ))}
       </div>
 
-      {/* Controls */}
-      <div className="controls">
-        <Button
-          data-testid="launch-ball-btn"
-          disabled={isBallFalling}
-          onClick={onLaunch}
-          size="lg"
-          className="launch-btn"
-        >
-          {isBallFalling ? (
-            <>
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              >
-                <Sparkles className="w-6 h-6 mr-2" />
-              </motion.div>
-              Launching...
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-6 h-6 mr-2" />
-              Launch Ball • {ENTRY_FEE_PLS.toLocaleString()} PLS
-            </>
-          )}
-        </Button>
+      {/* Instructions */}
+      <div className="puck-instructions">
+        {!isAnimating ? (
+          <p><strong>Drag the puck</strong> to one of 4 zones and release to drop!</p>
+        ) : (
+          <p>Puck falling...</p>
+        )}
       </div>
     </div>
   );
