@@ -69,6 +69,30 @@ const PlinkoBoard369 = ({
       }
     }
     setPegPositions(pegs);
+    
+    // Add blockers at columns 1 and 20 to prevent straight-down falls
+    const blockers = [];
+    const boardWidth = 90;
+    const startX = 5;
+    const horizontalSpacing = boardWidth / 24;
+    
+    // Blocker at column 1 (left side)
+    blockers.push({
+      id: 'blocker-left',
+      x: startX + (1 * horizontalSpacing),
+      y: 8,
+      height: 80,
+    });
+    
+    // Blocker at column 20 (right side)
+    blockers.push({
+      id: 'blocker-right',
+      x: startX + (20 * horizontalSpacing),
+      y: 8,
+      height: 80,
+    });
+    
+    setBlockerPositions(blockers);
   }, []);
 
   // Shuffle badges
