@@ -323,6 +323,21 @@ const PlinkoBoard369 = ({
 
       {/* Extended Plinko Pegs Area with Staggered Layout */}
       <div className="pegs-area-extended">
+        {/* Blockers at sides */}
+        {blockerPositions.map((blocker) => (
+          <div
+            key={blocker.id}
+            className="blocker"
+            style={{
+              left: `${blocker.x}%`,
+              top: `${blocker.y}%`,
+              height: `${blocker.height}%`,
+            }}
+          >
+            <img src={BLOCKER_SVG} alt="Blocker" className="blocker-image" draggable={false} />
+          </div>
+        ))}
+
         {pegPositions.map((peg) => (
           <div
             key={peg.id}
