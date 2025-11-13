@@ -27,6 +27,7 @@ const PlinkoBoard369 = ({
   const [flashingPeg, setFlashingPeg] = useState(null);
   const [landedSlot, setLandedSlot] = useState(null);
   const [pegPositions, setPegPositions] = useState([]);
+  const [blockerPositions, setBlockerPositions] = useState([]);
   const boardRef = useRef(null);
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
