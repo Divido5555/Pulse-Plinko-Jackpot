@@ -137,9 +137,14 @@ const PlinkoBoard369 = ({
     const x = ((clientX - rect.left) / rect.width) * 100;
     const y = ((clientY - rect.top) / rect.height) * 100;
     
+    // Restrict puck to safe area (not in blocked columns 1 and 20)
+    // Allow dragging between approximately columns 2-19
+    const minX = 12; // Just past left blocker
+    const maxX = 88; // Just before right blocker
+    
     setPuckPosition({ 
-      x: Math.max(5, Math.min(95, x)), 
-      y: Math.max(0, Math.min(7, y)) 
+      x: Math.max(minX, Math.min(maxX, x)), 
+      y: Math.max(0, Math.min(10, y)) // Allow slightly more vertical drag space
     });
   };
 
