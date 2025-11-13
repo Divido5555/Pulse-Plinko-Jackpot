@@ -32,7 +32,7 @@ const PlinkoBoard369 = ({
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate rectangular staggered Plinko grid with fewer rows for better spacing
+  // Generate rectangular staggered Plinko grid with blockers at top
   useEffect(() => {
     const pegs = [];
     const numRows = 19; // 19 rows with expanded spacing
@@ -41,10 +41,13 @@ const PlinkoBoard369 = ({
     const boardWidth = 90; // Use 90% of board width
     const boardHeight = 80; // Use 80% of board height
     const startX = 5; // Start 5% from left
-    const startY = 8; // Start 8% from top
+    
+    // Blockers are positioned at the top, then pegs start below them
+    const blockerHeight = 3; // Height space for blockers at top (in %)
+    const pegStartY = 8 + blockerHeight; // Pegs start after blocker space
     
     const horizontalSpacing = boardWidth / numColumns; // Spacing for 20 columns
-    const verticalSpacing = boardHeight / numRows; // Expanded vertical spacing
+    const verticalSpacing = (boardHeight - blockerHeight) / numRows; // Spacing adjusted for blocker space
     
     for (let row = 0; row < numRows; row++) {
       // Determine if this is an even or odd row for staggering
@@ -62,7 +65,7 @@ const PlinkoBoard369 = ({
         pegs.push({
           id: `${row}-${col}`,
           x: startX + offsetX + (col * horizontalSpacing),
-          y: startY + (row * verticalSpacing),
+          y: pegStartY + (row * verticalSpacing),
           row,
           col,
         });
@@ -70,12 +73,11 @@ const PlinkoBoard369 = ({
     }
     setPegPositions(pegs);
     
-    // Add small horizontal blockers at row 4 (index 3)
+    // Add small horizontal blockers ABOVE first row of pegs
     const blockers = [];
-    const blockerRow = 3; // Row 4 (zero-indexed as 3)
-    const blockerY = startY + (blockerRow * verticalSpacing);
+    const blockerY = 8; // Position at top, before pegs start
     
-    // Left blocker: starts at left margin (x=0), extends to about 2nd peg
+    // Left blocker: starts at left margin (x=0), extends to about 2nd column
     const leftBlockerWidth = startX + (2 * horizontalSpacing); // Extends to 2nd peg position
     blockers.push({
       id: 'blocker-left',
@@ -85,7 +87,7 @@ const PlinkoBoard369 = ({
       side: 'left',
     });
     
-    // Right blocker: extends from 2nd-to-last peg to right edge
+    // Right blocker: extends from 2nd-to-last column to right edge
     const rightBlockerStart = startX + ((numColumns - 2) * horizontalSpacing);
     const rightBlockerWidth = (100 - rightBlockerStart); // Extend to right edge
     blockers.push({
