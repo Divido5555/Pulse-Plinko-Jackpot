@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
 import { PULSE369_LOGO } from '../config/tokenAssets';
+import BLOCKER_SVG from '../assets/blocker.svg';
 
 const ENTRY_FEE_PLS = 10000;
 
