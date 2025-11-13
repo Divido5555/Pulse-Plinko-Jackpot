@@ -124,7 +124,7 @@ frontend:
         comment: "Optimized to 19 rows with increased spacing for more realistic puck flow. Removed top row but used same vertical space by increasing spacing. Even rows have 25 pegs, odd rows have 24 pegs offset by half spacing. Puck has more room to move and bounce naturally."
       - working: true
         agent: "main"
-        comment: "FINAL: Moved blockers to TOP of board, above first row of pegs. Pegs shifted down to start after blocker space. Puck drag area restricted to prevent launching from columns 1 and 20. Blockers prevent puck from entering blocked edge columns from the start. Left blocker: left margin to ~column 2. Right blocker: ~column 19 to right margin. Full 20 columns of pegs maintained."
+        comment: "FINAL CORRECTED: Blockers positioned at top with proper gap. Pegs moved down one row spacing from blockers. Puck strictly restricted to columns 2-19 (cannot drag into columns 1 or 20). This simulates the bumpers blocking those edge shoots. Gap ensures visual separation between blockers and pegs. Left blocker: left margin to ~column 2. Right blocker: ~column 19 to right margin. Full 20 columns of pegs maintained."
 
 metadata:
   created_by: "main_agent"
