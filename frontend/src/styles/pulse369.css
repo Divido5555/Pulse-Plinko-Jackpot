@@ -223,15 +223,6 @@
   gap: 48px;
 }
 
-.peg {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #8b5cf6;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
-  opacity: 0.8;
-}
-
 .plinko-ball {
   position: absolute;
   width: 45px;
