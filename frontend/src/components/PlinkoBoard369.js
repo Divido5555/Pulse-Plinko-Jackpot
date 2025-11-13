@@ -3,9 +3,6 @@ import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
 import { PULSE369_LOGO } from '../config/tokenAssets';
 
 const ENTRY_FEE_PLS = 10000;
-const NUM_PEGS_PER_ROW = 13; // Pegs across
-const NUM_ROWS = 14; // 4 more rows added
-const DROP_ZONES = 4; // 4 drop zones
 
 const PlinkoBoard369 = ({
   isBallFalling,
@@ -31,19 +28,31 @@ const PlinkoBoard369 = ({
   const [pegPositions, setPegPositions] = useState([]);
   const boardRef = useRef(null);
   const animationRef = useRef(null);
+  const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate peg positions
+  // Generate proper staggered peg layout
   useEffect(() => {
     const pegs = [];
-    for (let row = 0; row < NUM_ROWS; row++) {
-      const numPegsInRow = NUM_PEGS_PER_ROW + (row % 2);
-      const offsetX = (row % 2) === 0 ? 0 : 2.5;
+    const numRows = 14;
+    const baseNumPegs = 12; // Base number of pegs in even rows
+    const pegSpacing = 8.0; // Horizontal spacing between pegs
+    const rowSpacing = 5.8; // Vertical spacing between rows
+    const startY = 8; // Start position from top
+    
+    for (let row = 0; row < numRows; row++) {
+      const isOddRow = row % 2 === 1;
+      const numPegsInRow = isOddRow ? baseNumPegs + 1 : baseNumPegs;
+      const offsetX = isOddRow ? 0 : pegSpacing / 2; // Offset even rows by half spacing
+      
+      // Calculate starting position to center the pegs
+      const totalWidth = (numPegsInRow - 1) * pegSpacing;
+      const startX = 50 - (totalWidth / 2) + offsetX;
       
       for (let i = 0; i < numPegsInRow; i++) {
         pegs.push({
           id: `${row}-${i}`,
-          x: offsetX + (i * 7.5),
-          y: 8 + (row * 5.5),
+          x: startX + (i * pegSpacing),
+          y: startY + (row * rowSpacing),
           row,
           col: i,
         });
@@ -90,7 +99,7 @@ const PlinkoBoard369 = ({
     
     setPuckPosition({ 
       x: Math.max(5, Math.min(95, x)), 
-      y: Math.max(0, Math.min(8, y)) 
+      y: Math.max(0, Math.min(7, y)) 
     });
   };
 
@@ -100,14 +109,24 @@ const PlinkoBoard369 = ({
     startPuckAnimation();
   };
 
-  const checkPegCollision = (x, y) => {
+  const checkPegCollision = (x, y, vx, vy) => {
+    const collisionRadius = 2.5; // Increased collision detection radius
+    
     for (const peg of pegPositions) {
       const dx = x - peg.x;
       const dy = y - peg.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       
-      if (distance < 2) { // Collision threshold
-        return peg;
+      if (distance < collisionRadius) {
+        // Calculate bounce direction
+        const angle = Math.atan2(dy, dx);
+        const speed = Math.sqrt(vx * vx + vy * vy);
+        
+        return {
+          peg,
+          newVx: Math.cos(angle) * speed * 0.5 + (Math.random() - 0.5) * 0.8,
+          newVy: Math.sin(angle) * speed * 0.4 + 0.5,
+        };
       }
     }
     return null;
@@ -119,50 +138,64 @@ const PlinkoBoard369 = ({
     
     let currentX = puckPosition.x;
     let currentY = puckPosition.y;
-    let velocityX = 0;
-    let velocityY = 0;
-    const gravity = 0.3;
-    const bounce = 0.6;
-    const friction = 0.98;
+    velocityRef.current = { vx: (Math.random() - 0.5) * 0.5, vy: 0 };
+    
+    const gravity = 0.25;
+    const friction = 0.99;
+    const maxVelocity = 3;
     
     const animate = () => {
       // Apply gravity
-      velocityY += gravity;
+      velocityRef.current.vy += gravity;
+      
+      // Limit velocity
+      velocityRef.current.vx = Math.max(-maxVelocity, Math.min(maxVelocity, velocityRef.current.vx));
+      velocityRef.current.vy = Math.min(maxVelocity, velocityRef.current.vy);
       
       // Update position
-      currentX += velocityX;
-      currentY += velocityY;
+      currentX += velocityRef.current.vx;
+      currentY += velocityRef.current.vy;
       
       // Check peg collisions
-      const collidedPeg = checkPegCollision(currentX, currentY);
-      if (collidedPeg) {
+      const collision = checkPegCollision(
+        currentX, 
+        currentY, 
+        velocityRef.current.vx, 
+        velocityRef.current.vy
+      );
+      
+      if (collision) {
         // Flash individual peg
-        setFlashingPeg(collidedPeg.id);
-        setTimeout(() => setFlashingPeg(null), 150);
+        setFlashingPeg(collision.peg.id);
+        setTimeout(() => setFlashingPeg(null), 120);
         
-        // Bounce off peg
-        const angle = Math.atan2(currentY - collidedPeg.y, currentX - collidedPeg.x);
-        velocityX = Math.cos(angle) * 2 + (Math.random() - 0.5) * 1;
-        velocityY = Math.abs(Math.sin(angle)) * 2;
+        // Apply bounce
+        velocityRef.current.vx = collision.newVx;
+        velocityRef.current.vy = collision.newVy;
+        
+        // Move puck away from peg slightly
+        const angle = Math.atan2(currentY - collision.peg.y, currentX - collision.peg.x);
+        currentX = collision.peg.x + Math.cos(angle) * 2.5;
+        currentY = collision.peg.y + Math.sin(angle) * 2.5;
       }
       
       // Apply friction
-      velocityX *= friction;
+      velocityRef.current.vx *= friction;
       
-      // Boundaries
-      if (currentX < 2) {
-        currentX = 2;
-        velocityX = Math.abs(velocityX) * bounce;
+      // Side boundaries with bounce
+      if (currentX < 3) {
+        currentX = 3;
+        velocityRef.current.vx = Math.abs(velocityRef.current.vx) * 0.7;
       }
-      if (currentX > 98) {
-        currentX = 98;
-        velocityX = -Math.abs(velocityX) * bounce;
+      if (currentX > 97) {
+        currentX = 97;
+        velocityRef.current.vx = -Math.abs(velocityRef.current.vx) * 0.7;
       }
       
       setPuckPosition({ x: currentX, y: currentY });
       
-      // Check if reached bottom
-      if (currentY >= 88) {
+      // Check if reached bottom (90% down)
+      if (currentY >= 90) {
         // Map X position to slot (24 slots)
         const slotIndex = Math.round((currentX / 100) * 23);
         const finalSlot = Math.max(0, Math.min(23, slotIndex));
@@ -172,6 +205,7 @@ const PlinkoBoard369 = ({
           onBallLanded(finalSlot);
           setIsAnimating(false);
           setPuckPosition({ x: 50, y: 3 });
+          velocityRef.current = { vx: 0, vy: 0 };
         }, 400);
       } else {
         animationRef.current = requestAnimationFrame(animate);
@@ -207,7 +241,7 @@ const PlinkoBoard369 = ({
         <b>Moving</b> — both move each play
       </div>
 
-      {/* Extended Plinko Pegs Area */}
+      {/* Extended Plinko Pegs Area with Staggered Layout */}
       <div className="pegs-area-extended">
         {pegPositions.map((peg) => (
           <div
@@ -227,11 +261,12 @@ const PlinkoBoard369 = ({
             left: `${puckPosition.x}%`,
             top: `${puckPosition.y}%`,
             cursor: isAnimating ? 'default' : (isDragging ? 'grabbing' : 'grab'),
+            pointerEvents: isAnimating ? 'none' : 'auto',
           }}
           onMouseDown={handlePuckDragStart}
           onTouchStart={handlePuckDragStart}
         >
-          <img src={PULSE369_LOGO} alt="Pulse369 DAO" className="ball-logo" />
+          <img src={PULSE369_LOGO} alt="Pulse369 DAO" className="ball-logo" draggable={false} />
         </div>
       </div>
 
