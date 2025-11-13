@@ -30,19 +30,19 @@ const PlinkoBoard369 = ({
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate rectangular staggered Plinko grid (like reference image)
+  // Generate rectangular staggered Plinko grid with fewer pegs for realistic flow
   useEffect(() => {
     const pegs = [];
-    const numRows = 20;
+    const numRows = 19; // Reduced from 20 for better puck movement
     const numColumns = 24; // Match our 24 bottom slots
     
     const boardWidth = 90; // Use 90% of board width
-    const boardHeight = 80; // Use 80% of board height
+    const boardHeight = 80; // Use 80% of board height (same total space)
     const startX = 5; // Start 5% from left
     const startY = 8; // Start 8% from top
     
-    const horizontalSpacing = boardWidth / numColumns; // Space between columns
-    const verticalSpacing = boardHeight / numRows; // Space between rows
+    const horizontalSpacing = boardWidth / numColumns; // Wider horizontal spacing
+    const verticalSpacing = boardHeight / numRows; // Taller vertical spacing (fills same space with fewer rows)
     
     for (let row = 0; row < numRows; row++) {
       // Determine if this is an even or odd row for staggering
