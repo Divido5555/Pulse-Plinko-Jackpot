@@ -233,23 +233,38 @@
   transform: translate(-50%, -50%) scale(1.5);
 }
 
-/* Blockers */
-.blocker {
+/* Horizontal Blockers at row 4 */
+.blocker-horizontal {
   position: absolute;
-  width: 3%;
+  height: 30px;
   display: flex;
-  align-items: stretch;
-  justify-content: center;
+  align-items: center;
   z-index: 5;
-  transform: translateX(-50%);
   pointer-events: none;
+  transform: translateY(-50%);
 }
 
-.blocker-image {
-  width: 100%;
+.blocker-left {
+  justify-content: flex-start;
+}
+
+.blocker-right {
+  justify-content: flex-end;
+}
+
+.blocker-horizontal .blocker-image {
   height: 100%;
-  object-fit: fill;
+  width: auto;
+  object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+}
+
+.blocker-left .blocker-image {
+  transform: scaleX(1);
+}
+
+.blocker-right .blocker-image {
+  transform: scaleX(-1); /* Mirror for right side */
 }
 
 .plinko-ball {
