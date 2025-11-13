@@ -75,6 +75,9 @@ const PlinkoGame369 = () => {
   };
 
   const handleLaunch = async () => {
+    // Clear any existing banner immediately
+    setBanner(null);
+    
     // Check balance
     if (playerBalance < ENTRY_FEE_PLS) {
       toast.error('Insufficient balance', {
