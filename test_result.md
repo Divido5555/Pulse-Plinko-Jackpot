@@ -139,3 +139,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Fixed peg layout in PlinkoBoard369.js. Implemented proper 20-row staggered pyramid pattern matching reference image. Pegs now properly offset by half spacing between rows to create natural bouncing paths. Ready for user testing."
+  - agent: "main"
+    message: "Added blockers at row 3 position on both sides. Indented peg grid by 3 columns on each side to accommodate blocker images. Blockers prevent puck from falling straight down edge shoots. Collision detection added for blockers."
