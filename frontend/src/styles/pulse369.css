@@ -304,14 +304,19 @@
   color: #a78bfa;
 }
 
-/* === Slots Row (Single Horizontal Line) === */
-.slots-row {
+/* === Slots Row for 24 Slots === */
+.slots-row-24 {
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   padding: 8px 4px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   overflow-x: auto;
+}
+
+.slots-row-24 .slot {
+  width: 48px;
+  height: 66px;
 }
 
 .slot {
