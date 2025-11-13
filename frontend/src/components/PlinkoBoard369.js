@@ -215,6 +215,27 @@ const PlinkoBoard369 = ({
       currentX += velocityRef.current.vx;
       currentY += velocityRef.current.vy;
       
+      // Check blocker collisions first
+      const blockerCollision = checkBlockerCollision(
+        currentX,
+        currentY,
+        velocityRef.current.vx,
+        velocityRef.current.vy
+      );
+      
+      if (blockerCollision) {
+        // Apply bounce from blocker
+        velocityRef.current.vx = blockerCollision.newVx;
+        velocityRef.current.vy = blockerCollision.newVy;
+        
+        // Move puck away from blocker
+        if (currentX < blockerCollision.blocker.x) {
+          currentX = blockerCollision.blocker.x - 2;
+        } else {
+          currentX = blockerCollision.blocker.x + 2;
+        }
+      }
+      
       // Check peg collisions
       const collision = checkPegCollision(
         currentX, 
