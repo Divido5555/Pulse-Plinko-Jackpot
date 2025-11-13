@@ -30,28 +30,30 @@ const PlinkoBoard369 = ({
   const animationRef = useRef(null);
   const velocityRef = useRef({ vx: 0, vy: 0 });
 
-  // Generate proper staggered peg layout
+  // Generate proper triangular Plinko peg layout (like real Plinko board)
   useEffect(() => {
     const pegs = [];
-    const numRows = 14;
-    const baseNumPegs = 12; // Base number of pegs in even rows
-    const pegSpacing = 8.0; // Horizontal spacing between pegs
-    const rowSpacing = 5.8; // Vertical spacing between rows
-    const startY = 8; // Start position from top
+    const numRows = 20; // Extended to 20 rows as requested
+    const rowSpacing = 4.2; // Vertical spacing between rows
+    const startY = 7; // Start position from top
     
     for (let row = 0; row < numRows; row++) {
+      // Number of pegs increases: start with 3 at top, add 1 every row
+      const numPegsInRow = 3 + row;
       const isOddRow = row % 2 === 1;
-      const numPegsInRow = isOddRow ? baseNumPegs + 1 : baseNumPegs;
-      const offsetX = isOddRow ? 0 : pegSpacing / 2; // Offset even rows by half spacing
       
-      // Calculate starting position to center the pegs
-      const totalWidth = (numPegsInRow - 1) * pegSpacing;
-      const startX = 50 - (totalWidth / 2) + offsetX;
+      // Calculate spacing based on number of pegs to fit them across width
+      const totalWidth = 85; // Use 85% of width
+      const pegSpacing = totalWidth / (numPegsInRow + 1);
+      
+      // Offset for staggered pattern
+      const baseOffsetX = 7.5; // Start offset from left
+      const staggerOffset = isOddRow ? pegSpacing / 2 : 0;
       
       for (let i = 0; i < numPegsInRow; i++) {
         pegs.push({
           id: `${row}-${i}`,
-          x: startX + (i * pegSpacing),
+          x: baseOffsetX + staggerOffset + ((i + 1) * pegSpacing),
           y: startY + (row * rowSpacing),
           row,
           col: i,
