@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Wallet, TrendingUp, TrendingDown, PlayCircle, Copy, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRCodeSVG } from 'qrcode.react';
 
 const ENTRY_FEE_PLS = 10000;
 const DEPOSIT_ADDRESS = '0x8855DEc7627CF4A23A2354F998Dfd57C500A8C51'; // Host wallet for deposits
