@@ -42,10 +42,18 @@ Per $1 play:
 - **Game**: https://plinko-jackpot.preview.emergentagent.com
 - **Admin Dashboard**: https://plinko-jackpot.preview.emergentagent.com/admin
 
-### Smart Contract
-Located at `/contracts/PlinkoGame.sol`
+### Smart Contracts
 
-**Important**: The contract needs to be deployed to PulseChain 369. Use Remix or Hardhat for deployment.
+**Production Contracts** (Use these):
+- ✅ **PlinkoGame369.sol** - Main game contract with enhanced security
+- ✅ **PLS369Token.sol** - Fixed-supply ERC20 token (369M tokens)
+
+**Legacy/Demo** (Do NOT use):
+- ❌ **PlinkoGame.sol** - DEPRECATED (has critical security vulnerabilities)
+
+**Deployment Guide**: See `/contracts/README.md` and `/PLS369_DEPLOYMENT_CHECKLIST.md`
+
+**Important**: Always use PlinkoGame369.sol + PLS369Token.sol for production. PlinkoGame.sol has critical vulnerabilities and is for reference only.
 
 ### Wallet Addresses
 - **Dev Wallet**: `0x4890Be41BCe2E924C3aC4A1EFDC4a465F023Fe8B`

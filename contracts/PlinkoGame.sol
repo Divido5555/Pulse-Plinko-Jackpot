@@ -2,8 +2,18 @@
 pragma solidity ^0.8.0;
 
 /**
- * @title PlinkoGame
- * @dev Decentralized Plinko game for PulseChain ecosystem
+ * ⚠️ WARNING: DEPRECATED - DO NOT USE FOR PRODUCTION ⚠️
+ * 
+ * This contract has CRITICAL SECURITY VULNERABILITIES:
+ * - No reentrancy protection (attackers can drain funds)
+ * - Weak randomness using block values (miners can manipulate)
+ * - Missing access controls
+ * 
+ * USE PlinkoGame369.sol INSTEAD for production deployments.
+ * This file is kept for reference and demo purposes only.
+ * 
+ * @title PlinkoGame (DEPRECATED)
+ * @dev Legacy Plinko game - FOR REFERENCE ONLY
  * Entry: $1 worth of PLS
  * 20 slots: 5 prizes, 15 losers
  * Jackpots: Main ($1M target) and Mini ($10k target)

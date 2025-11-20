@@ -102,36 +102,31 @@ OVERALL:          ████░░░░░░ 4.8/10 ❌ NOT READY
 
 ---
 
-## 🎯 Which Contract Should We Use?
+## 🎯 Production Contract Decision ✅
 
-### PlinkoGame369.sol ✅ RECOMMENDED
-**Pros:**
-- ✅ Has reentrancy protection
-- ✅ Uses oracle for randomness
+### **CONFIRMED: Use PlinkoGame369.sol + PLS369Token.sol**
+
+**Decision Made:** November 20, 2025
+
+**Production Stack:**
+- ✅ **PlinkoGame369.sol** - Main game contract
+- ✅ **PLS369Token.sol** - ERC20 token (369M supply)
+- ❌ **PlinkoGame.sol** - DEPRECATED (do not use)
+
+**Why PlinkoGame369.sol:**
+**Why PlinkoGame369.sol:**
+- ✅ ReentrancyGuard protection
+- ✅ Fetch Oracle for verifiable randomness
 - ✅ Proper access controls
-- ✅ Has comprehensive tests
+- ✅ Comprehensive tests
+- ✅ Immutable critical addresses
 
-**Cons:**
-- ⚠️ Oracle dependency
-- ⚠️ Randomness pool can deplete
-- ⚠️ More complex
+**PlinkoGame.sol Status:**
+- ❌ DEPRECATED - Do not use
+- ❌ Has critical vulnerabilities
+- ❌ Kept for reference only
 
-**Status:** Needs minor fixes, good foundation
-
----
-
-### PlinkoGame.sol ❌ NOT RECOMMENDED
-**Pros:**
-- ✅ Simpler design
-- ✅ Fewer dependencies
-
-**Cons:**
-- ❌ No reentrancy protection
-- ❌ Weak randomness
-- ❌ No tests
-- ❌ Major security holes
-
-**Status:** Needs complete rewrite
+**See:** `/contracts/README.md` for deployment details
 
 ---
 
