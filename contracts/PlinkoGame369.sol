@@ -313,27 +313,20 @@ contract PlinkoGame369 is ReentrancyGuard {
     }
 
     function _payoutMainJackpot(address winner)
-        internal
-        returns (uint256 winnerAmount)
+        internal returns (uint256 winnerAmount)
     {
         uint256 total = mainJackpot;
-        if (total == 0) {
-            return 0;
-        }
+        if (total == 0) return 0;
 
-        // 60% winner, 30% DAO, 10% reset
-        winnerAmount       = (total * 60) / 100;
-        uint256 daoAmt     = (total * 30) / 100;
-        uint256 resetAmt   = total - winnerAmount - daoAmt;
+        // 50% winner, 20% DAO, 30% reset
+        winnerAmount = (total * 50) / 100;
+        uint256 daoAmt = (total * 20) / 100;
+        uint256 resetAmt = total - winnerAmount - daoAmt;
 
         mainJackpot = resetAmt;
 
-        if (winnerAmount > 0) {
-            require(pls369.transfer(winner, winnerAmount), "Winner transfer failed");
-        }
-        if (daoAmt > 0) {
-            require(pls369.transfer(daoTreasury, daoAmt), "DAO transfer failed");
-        }
+        require(pls369.transfer(winner, winnerAmount), "Winner transfer failed");
+        require(pls369.transfer(daoTreasury, daoAmt), "DAO transfer failed");
         return winnerAmount;
     }
 
