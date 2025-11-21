@@ -263,12 +263,11 @@ contract PlinkoGame369 is ReentrancyGuard {
 
         playCount++;
 
-        // 2. Per-play split:
-        // 50% main, 15% mini, 25% DAO, 10% dev
-        uint256 mainAdd = (ENTRY_PRICE * 50) / 100;
-        uint256 miniAdd = (ENTRY_PRICE * 15) / 100;
-        uint256 daoAdd  = (ENTRY_PRICE * 25) / 100;
-        uint256 devAdd  = (ENTRY_PRICE * 10) / 100;
+        // per-play split: 40 / 10 / 4 / 3
+        uint256 mainAdd = (ENTRY_PRICE * 40) / 100;
+        uint256 miniAdd = (ENTRY_PRICE * 10) / 100;
+        uint256 daoAdd  = (ENTRY_PRICE * 4)  / 100;
+        uint256 devAdd  = (ENTRY_PRICE * 3)  / 100;
 
         mainJackpot += mainAdd;
         miniJackpot += miniAdd;
