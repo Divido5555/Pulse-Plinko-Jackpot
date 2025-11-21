@@ -3,40 +3,44 @@ pragma solidity ^0.8.20;
 
 /**
  * @title PlinkoGame369
- * @dev PLS369-only Plinko game used as a token distribution
- *      and jackpot engine for the PLS369 DAO ecosystem.
+ * @dev PLS369-only Plinko game used as token distribution + jackpot engine
+ *      for the PLS369 DAO ecosystem.
  *
- * - Players pay in PLS369.
+ * - Players pay ENTRY_PRICE in PLS369.
  * - Jackpots and prizes are paid out in PLS369.
  * - Game uses Fetch Oracle RNG feed for randomness.
  * - No external AMM interaction (no swaps, no PLS).
  * - No host wallet, no donation wallet. DAO is the "house".
  *
- * Per-play entry price:
- *  - ENTRY_PRICE tokens (e.g. 10 PLS369 per play).
+ * Economics:
+ *  - Target RTP ≈ 93–94% (house edge ≈ 6–7% / symbolic 6.9%).
  *
- * Per-play split (ENTRY_PRICE) – fixed:
- *  - 50% → main jackpot pool
- *  - 15% → mini jackpot pool
- *  - 25% → DAO rewards (accrued, withdrawable by daoTreasury)
- *  - 10% → dev rewards (accrued, withdrawable by devWallet)
+ * Per-play split of ENTRY_PRICE:
+ *  - 40% → main jackpot pool
+ *  - 10% → mini jackpot pool
+ *  - 4%  → DAO rewards (daoAccrued)
+ *  - 3%  → dev rewards (devAccrued)
  *
- * Main jackpot win (slot 10, with odds):
- *  - 60% to player
- *  - 30% to DAO treasury
- *  - 10% remains in jackpot (reset)
+ * Main jackpot hit:
+ *  - Slot 10 AND RNG passes MAIN_JACKPOT_ODDS.
+ *  - Payout:
+ *    - 50% to winner
+ *    - 20% to DAO treasury
+ *    - 30% reset (stays in main jackpot)
  *
- * Mini jackpot win (slot 16, with odds):
- *  - 75% to player
- *  - 10% to devWallet
- *  - 15% remains in mini jackpot (reset)
+ * Mini jackpot hit:
+ *  - Slot 2 OR slot 16 AND RNG passes MINI_JACKPOT_ODDS.
+ *  - Payout:
+ *    - 50% to winner
+ *    - 10% to dev wallet
+ *    - 40% reset (stays in mini jackpot)
  *
- * Non-jackpot prizes (multipliers, scaled by 100, 0-based slots):
- *  - slot 3  → 3.0x
- *  - slot 7  → 2.0x
- *  - slot 11 → 5.0x
- *  - slot 15 → 2.0x
- *  - slot 18 → 3.0x
+ * Flat multipliers (scaled by 100, payout vs full ENTRY_PRICE):
+ *  - Slot 3  → 3x
+ *  - Slot 7  → 2x
+ *  - Slot 11 → 5x
+ *  - Slot 15 → 2x
+ *  - Slot 18 → 2x
  */
 interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
