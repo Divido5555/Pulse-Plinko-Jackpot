@@ -331,27 +331,20 @@ contract PlinkoGame369 is ReentrancyGuard {
     }
 
     function _payoutMiniJackpot(address winner)
-        internal
-        returns (uint256 winnerAmount)
+        internal returns (uint256 winnerAmount)
     {
         uint256 total = miniJackpot;
-        if (total == 0) {
-            return 0;
-        }
+        if (total == 0) return 0;
 
-        // 75% winner, 10% dev, 15% reset
-        winnerAmount       = (total * 75) / 100;
-        uint256 devAmt     = (total * 10) / 100;
-        uint256 resetAmt   = total - winnerAmount - devAmt;
+        // 50% winner, 10% dev, 40% reset
+        winnerAmount = (total * 50) / 100;
+        uint256 devAmt = (total * 10) / 100;
+        uint256 resetAmt = total - winnerAmount - devAmt;
 
         miniJackpot = resetAmt;
 
-        if (winnerAmount > 0) {
-            require(pls369.transfer(winner, winnerAmount), "Winner transfer failed");
-        }
-        if (devAmt > 0) {
-            require(pls369.transfer(devWallet, devAmt), "Dev transfer failed");
-        }
+        require(pls369.transfer(winner, winnerAmount), "Winner transfer failed");
+        require(pls369.transfer(devWallet, devAmt), "Dev transfer failed");
         return winnerAmount;
     }
 
