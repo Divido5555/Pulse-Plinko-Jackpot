@@ -113,31 +113,31 @@ contract PlinkoGame369 is ReentrancyGuard {
     // Main jackpot slot: 10 (no flat multiplier)
     // Mini jackpot slot: 16 (no flat multiplier)
     uint256[] public multipliers = [
-        0,    // 0 - loser
-        0,    // 1 - loser
-        0,    // 2 - loser
-        300,  // 3 - 3.0x
-        0,    // 4 - loser
-        0,    // 5 - loser
-        0,    // 6 - loser
-        200,  // 7 - 2.0x
-        0,    // 8 - loser
-        0,    // 9 - loser
-        0,    // 10 - main jackpot slot
-        500,  // 11 - 5.0x
-        0,    // 12 - loser
-        0,    // 13 - loser
-        0,    // 14 - loser
-        200,  // 15 - 2.0x
-        0,    // 16 - mini jackpot slot
-        0,    // 17 - loser
-        300,  // 18 - 3.0x
-        0     // 19 - loser
+        0,    // 0 loser
+        0,    // 1 loser
+        0,    // 2 mini jackpot trigger
+        300,  // 3 3x
+        0,    // 4 loser
+        0,    // 5 loser
+        0,    // 6 loser
+        200,  // 7 2x
+        0,    // 8 loser
+        0,    // 9 loser
+        0,    // 10 main jackpot slot
+        500,  // 11 5x
+        0,    // 12 loser
+        0,    // 13 loser
+        0,    // 14 loser
+        200,  // 15 2x
+        0,    // 16 mini jackpot trigger
+        0,    // 17 loser
+        200,  // 18 2x
+        0     // 19 loser
     ];
 
     // Odds: 1 in X when slot matches
-    uint256 public constant MAIN_JACKPOT_ODDS = 166_667; // ~3.33M plays
-    uint256 public constant MINI_JACKPOT_ODDS = 4_762;   // ~95k plays
+    uint256 public constant MAIN_JACKPOT_ODDS = 33_333;
+    uint256 public constant MINI_JACKPOT_ODDS = 4_762;
 
     // ===== EVENTS =====
     event RandomnessToppedUp(uint256 added, uint256 newPoolSize);
