@@ -1,132 +1,246 @@
-# PulseChain Plinko - Decentralized Gaming Platform
+# PLS369 DAO — On-Chain Plinko Distribution Game
 
-A beautiful, decentralized Plinko game built on PulseChain 369 with dual jackpot system and PulseChain ecosystem token branding.
+Welcome to the official **PLS369 DAO Plinko Game** — a fully on-chain, verifiably fair, automated token-distribution engine built on PulseChain.
 
-## 🎮 Features
-
-### Game Mechanics
-- **Entry Fee**: 1 PLS (~$1) per game
-- **20 Slots**: 5 prize slots with ecosystem token branding, 15 empty slots
-- **Prize Multipliers**:
-  - INCENTIVE: 1.1x (12% odds)
-  - PulseX: 1.5x (4% odds)  
-  - Medium: 2.0x (3.5% odds)
-  - HEX: 3.0x (1.3% odds)
-  - PULSE: 5.0x (0.38% odds)
-
-### Jackpot System
-- **Main Jackpot** (~$1M target):
-  - Odds: 1 in 1.2M plays
-  - Payout: 60% winner, 10% burn, 10% host, 10% dev, 10% reset
-  
-- **Mini Jackpot** (~$10k target):
-  - Odds: 1 in 53k plays
-  - Payout: 80% winner, 10% host, 10% reset
-
-### Distribution Model
-Per $1 play:
-- 32% → Base prize pool
-- 50% → Main jackpot accumulation
-- 15% → Mini jackpot accumulation
-- 5% → Host wallet (paid every 1000 plays)
-
-### Tech Stack
-- **Frontend**: React 19, Framer Motion, Tailwind CSS, Shadcn UI
-- **Backend**: FastAPI (Python), MongoDB
-- **Blockchain**: PulseChain 369 (Smart Contract in Solidity)
-- **AI**: GPT-5 for game insights and analytics
-
-## 🚀 Quick Start
-
-### Access the Game
-- **Game**: https://plinko-jackpot.preview.emergentagent.com
-- **Admin Dashboard**: https://plinko-jackpot.preview.emergentagent.com/admin
-
-### Smart Contract
-Located at `/contracts/PlinkoGame.sol`
-
-**Important**: The contract needs to be deployed to PulseChain 369. Use Remix or Hardhat for deployment.
-
-### Wallet Addresses
-- **Dev Wallet**: `0x4890Be41BCe2E924C3aC4A1EFDC4a465F023Fe8B`
-- **Host Wallet**: `0x8855DEc7627CF4A23A2354F998Dfd57C500A8C51`
-- **Burn Address**: `0x000000000000000000000000000000000000dEaD`
-
-## 🎨 Features
-
-✅ Beautiful Plinko board with animated ball physics
-✅ 20 slots featuring PulseChain ecosystem tokens (HEX, PULSE, PulseX, INCENTIVE)
-✅ Real-time jackpot displays (Main & Mini)
-✅ Admin dashboard with analytics
-✅ AI-powered insights using GPT-5
-✅ Responsive design with modern UI
-✅ Toast notifications for wins/losses
-✅ Game statistics and history
-
-## 📊 How It Works
-
-1. **Entry**: Player pays 1 PLS (~$1) to play
-2. **Ball Drop**: Animated ball bounces through pegs
-3. **Landing**: Ball lands in one of 20 slots
-4. **Prizes**: 
-   - Token slots: Win 1.1x to 5x multipliers
-   - Empty slots: No payout, jackpot grows
-   - Jackpot slots: Ultra-rare chance for massive wins
-
-## 🔐 Security Notes
-
-**Current Version (Demo)**:
-- Uses simplified random number generation
-- Mock blockchain interactions
-- No actual wallet connection
-
-**For Production**:
-- Integrate Chainlink VRF for fair randomness
-- Add MetaMask/WalletConnect
-- Deploy and verify smart contract
-- Complete security audit
-- Add rate limiting and anti-bot measures
-
-## 🌟 Ecosystem Marketing
-
-This game serves as advertising for PulseChain ecosystem:
-- Every slot features a major PulseChain token
-- Players engage with the ecosystem through gameplay
-- Large jackpots attract attention to PulseChain 369
-- Viral potential through social sharing
-
-## 💡 Next Steps
-
-To make this production-ready:
-
-1. **Deploy Smart Contract**
-   ```bash
-   # Use Remix IDE or Hardhat
-   # Deploy to PulseChain 369 testnet first
-   # Update CONTRACT_ADDRESS in backend/.env
-   ```
-
-2. **Add Wallet Integration**
-   - Install Web3.js or Ethers.js in frontend
-   - Add MetaMask connection button
-   - Replace mock transactions with real ones
-
-3. **Test Thoroughly**
-   - Test on PulseChain testnet
-   - Verify all payout calculations
-   - Check jackpot distribution logic
-
-4. **Launch**
-   - Deploy to mainnet
-   - Market to PulseChain community
-   - Monitor and adjust parameters
-
-## 🎯 Revenue Model
-
-- **Host Earnings**: 5% of all plays + 10% of each jackpot win
-- **Dev Earnings**: 10% of Main jackpot wins
-- **Sustainability**: Jackpots only pay out 60-80%, keeping pools funded
+This system replaces all earlier prototypes, PLS-entry games, and deprecated lottery contracts.  
+**Everything in the main branch reflects the finalized, DAO-governed, PLS369-based model.**
 
 ---
 
-**Built with ❤️ for PulseChain ecosystem**
+## 🔥 What This Game Is
+
+A **single eternal distribution contract** that:
+
+- Accepts **only PLS369 token**
+- Pays jackpots and prizes in **PLS369**
+- Uses **Fetch Oracle** for secure randomness
+- Requires **no backend, no host wallet, and no donation wallet**
+- Acts as the **DAO's primary token emission + value engine**
+
+**The game both distributes the token and generates DAO revenue.**  
+There is no inflation curve, no emissions schedule — **the game IS the emission schedule.**
+
+---
+
+## 🌐 High-Level Architecture
+
+### 1. PLS369Token.sol
+
+A **fixed-supply ERC-20**:
+
+- **Supply**: 369,000,000 PLS369
+- Minted once to the DAO deployer
+- No taxes, no burns, no rebasing
+- DAO handles distribution via LP + game + treasury
+
+### 2. PlinkoGame369.sol
+
+The **only production game contract**:
+
+- **ENTRY_PRICE** = 10 PLS369
+- Jackpot + prize engine
+- Randomness via **Fetch Oracle** `getDataBefore`
+- **~6.9% symbolic house edge**
+- Withdrawals restricted to DAO and Dev
+
+### 3. Frontend
+
+A **React-based UI** that:
+
+- Calls `approve(ENTRY_PRICE)`
+- Calls `play()`
+- Displays slot, multiplier, jackpot state
+- Shows DAO/Dev accrual + jackpots in real time
+
+---
+
+## 🎮 Gameplay Overview
+
+### Entry
+
+Every play costs:
+
+```
+10 PLS369
+```
+
+User must `approve()` first.
+
+### 🧮 Per-Play Token Flow
+
+Every play distributes the entry amount as:
+
+| Destination | Percentage | Purpose |
+|-------------|------------|---------|
+| Main Jackpot | 40% | Primary prize pool |
+| Mini Jackpot | 10% | Frequent mini-jackpots |
+| DAO Rewards | 4% | DAO revenue |
+| Dev Rewards | 3% | Dev funding |
+| Regular Prize Payouts | Varies | From prize slots |
+| **House Edge** | **~6.9%** | **DAO profit & long-term sustainability** |
+
+The system is designed to have a **stable house advantage**, not an exploitably profitable jackpot.
+
+---
+
+## 💥 Prize Slots (Finalized)
+
+**Slot index** is `randomness % 20`.
+
+### Flat Prizes
+
+| Slot | Multiplier | Notes |
+|------|------------|-------|
+| **3** | **3×** | Medium hit |
+| **7** | **2×** | Common win |
+| **11** | **5×** | Big regular win |
+| **15** | **2×** | Common win |
+| **18** | **2×** | Medium win |
+
+### 🏆 Jackpots
+
+#### Main Jackpot
+
+**Triggered when:**
+- Slot = 10, **AND**
+- `randomness % MAIN_JACKPOT_ODDS == 0`
+
+**Payout:**
+- 50% → Winner
+- 20% → DAO
+- 30% → Jackpot reset
+
+**MAIN_JACKPOT_ODDS** = **1 in 33,333**  
+(≈10,000 USD target volatility, configurable)
+
+#### Mini Jackpot
+
+**Triggered when:**
+- Slot = **2 or 16**, **AND**
+- `randomness % MINI_JACKPOT_ODDS == 0`
+
+**Payout:**
+- 50% → Winner
+- 10% → Dev
+- 40% → Jackpot reset
+
+**MINI_JACKPOT_ODDS** = **1 in 4,762**
+
+Mini jackpot hits frequently enough to stay exciting.
+
+---
+
+## 🔒 Randomness (Fetch Oracle)
+
+The game uses:
+
+```solidity
+getDataBefore(queryId, timestamp)
+```
+
+Oracle data is:
+- Verified
+- Timestamp-limited (<1 hour old)
+- Batched into a **randomness pool**
+- Consumed sequentially for each play
+
+Frontend must warn when:
+- Randomness pool is low
+- Owner must call `topUpRandomness()`
+
+---
+
+## 🔧 Important Functions
+
+### Owner / DAO
+
+- `topUpRandomness(uint256 rounds)`
+- `seedJackpots(uint main, uint mini)`
+- `claimDaoRewards()`
+- `claimDevRewards()`
+
+### Players
+
+- `approve(10 PLS369)`
+- `play()`
+
+### View
+
+- `getGameState()`
+- `getRandomPoolSize()`
+
+---
+
+## 🏛 DAO Economics
+
+**PLS369 is a distribution token**, meaning:
+
+- Supply is fixed
+- Game redistributes liquidity
+- Players buy PLS369 to play
+- DAO & Dev wallets earn revenue passively
+- Treasury buys PLS using profit and deposits into LiquidLoans vaults (future phase)
+
+This creates:
+
+✅ Positive feedback loops  
+✅ Sustainable liquidity  
+✅ Progressive value accumulation  
+✅ Controlled game-based emission
+
+---
+
+## 📁 Repository Structure
+
+```
+/
+├── contracts/
+│   ├── PLS369Token.sol
+│   ├── PlinkoGame369.sol
+│   └── legacy/
+│       └── PlinkoGame.sol (DEPRECATED)
+│
+├── frontend/
+├── backend/   (optional, not required)
+│
+└── docs/
+    ├── TOKENOMICS.md
+    ├── GAME_ECONOMICS.md
+    └── ARCHITECTURE.md
+```
+
+**All old PLS-entry game files moved to `/legacy/`.**
+
+---
+
+## 🚀 Deployment Checklist
+
+### Testnet
+
+1. Deploy `PLS369Token.sol`
+2. Deploy `PlinkoGame369.sol`
+3. Seed jackpots
+4. Top up randomness
+5. Run 1,000+ plays
+6. Confirm jackpot odds
+7. Validate prize multipliers
+
+### Mainnet
+
+1. Point frontend to mainnet contracts
+2. Verify contracts on Blockscout
+3. Add PulseX LP link in frontend
+4. Announce launch
+
+---
+
+## 🔥 Status
+
+**Ready for audit + testnet launch.**  
+This branch is the **authoritative version** of PLS369 DAO Plinko.
+
+---
+
+## 🙏 Credits
+
+Developed by the **PLS369 DAO**.
