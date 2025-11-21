@@ -282,26 +282,22 @@ contract PlinkoGame369 is ReentrancyGuard {
         bool mainHit = false;
         bool miniHit = false;
 
-        // 4. Check for Jackpots or Prizes
-        // Main jackpot: slot 10 + odds
         if (slot == 10 && _checkOdds(randomness, MAIN_JACKPOT_ODDS)) {
             payout = _payoutMainJackpot(msg.sender);
             mainHit = true;
             emit MainJackpotWon(msg.sender, payout);
         }
-        // Mini jackpot: slot 16 + odds
-        else if (slot == 16 && _checkOdds(randomness, MINI_JACKPOT_ODDS)) {
+        else if (
+            (slot == 2 || slot == 16) &&
+            _checkOdds(randomness, MINI_JACKPOT_ODDS)
+        ) {
             payout = _payoutMiniJackpot(msg.sender);
             miniHit = true;
             emit MiniJackpotWon(msg.sender, payout);
         }
-        // Regular prize based on multipliers
         else if (multipliers[slot] > 0) {
             payout = (ENTRY_PRICE * multipliers[slot]) / 100;
-            if (payout > 0) {
-                bool pOk = pls369.transfer(msg.sender, payout);
-                require(pOk, "Prize transfer failed");
-            }
+            require(pls369.transfer(msg.sender, payout), "Prize transfer failed");
         }
 
         emit Play(msg.sender, playCount, slot, payout, mainHit, miniHit);
