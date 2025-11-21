@@ -2,6 +2,18 @@
 pragma solidity ^0.8.0;
 
 /**
+ * ⚠️  DEPRECATED — DO NOT USE ⚠️
+ * 
+ * This contract is obsolete and has been replaced by PlinkoGame369.sol
+ * 
+ * Issues with this contract:
+ * - Uses native PLS (replaced by PLS369 token model)
+ * - Has host wallet + donation wallet (removed in new model)
+ * - Pseudo-randomness (replaced by Fetch Oracle RNG)
+ * - Old tokenomics (replaced by DAO-governed model)
+ * 
+ * See contracts/PlinkoGame369.sol for the active version.
+ * 
  * @title PlinkoGame
  * @dev Decentralized Plinko game for PulseChain ecosystem
  * Entry: $1 worth of PLS
