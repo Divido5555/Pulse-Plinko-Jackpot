@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pulse369 Plinko - On-chain token distribution game on PulseChain">
+    <meta name="theme-color" content="#0a0a0f">
+    
+    <title>Pulse369 Plinko | PLS369 DAO Game</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Notifications Container -->
+    <div id="notifications" class="notifications"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-icon">🎰</div>
+                <span>Pulse369 Plinko</span>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div id="balance-display" class="balance-display" style="display: none;">
+                    <div class="token-icon"></div>
+                    <span id="balance-amount">0.00 PLS369</span>
+                </div>
+                
+                <button id="connect-btn" class="wallet-btn">
+                    <span>🦊</span>
+                    <span>Connect Wallet</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="game-container">
+        <div class="container">
+            <div class="game-layout">
+                <!-- Plinko Board -->
+                <section class="plinko-board">
+                    <div class="board-header">
+                        <h1>PLS369 Plinko</h1>
+                        <p>The on-chain token distribution game</p>
+                    </div>
+                    
+                    <!-- Result Display -->
+                    <div id="result-display" class="result-display">
+                        <div id="result-title" class="result-title">Result</div>
+                        <div id="result-amount" class="result-amount"></div>
+                    </div>
+                    
+                    <!-- Slots Grid -->
+                    <div id="slots-container" class="slots-container">
+                        <!-- Slots will be rendered by JavaScript -->
+                    </div>
+                    
+                    <!-- Slot Legend -->
+                    <div class="slot-legend" style="margin-top: 2rem; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 20px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3)); border: 2px solid gold; border-radius: 4px;"></div>
+                            <span style="color: gold;">Main Jackpot</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 20px; background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(169, 169, 169, 0.3)); border: 2px solid silver; border-radius: 4px;"></div>
+                            <span style="color: silver;">Mini Jackpot</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 20px; background: rgba(0, 255, 0, 0.2); border: 1px solid rgba(0, 255, 0, 0.3); border-radius: 4px;"></div>
+                            <span style="color: #00ff00;">Win Slot</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 20px; height: 20px; background: rgba(255, 0, 102, 0.2); border: 1px solid rgba(255, 0, 102, 0.3); border-radius: 4px;"></div>
+                            <span style="color: #ff0066;">Lose Slot</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <!-- Main Jackpot Card -->
+                    <div class="card">
+                        <div class="card-title">🏆 Main Jackpot</div>
+                        <div class="jackpot-amount" id="main-jackpot">Loading...</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+                            Win: 50% | Slot 10 | 1 in 33,333
+                        </div>
+                    </div>
+                    
+                    <!-- Mini Jackpot Card -->
+                    <div class="card jackpot-mini">
+                        <div class="card-title">🎁 Mini Jackpot</div>
+                        <div class="jackpot-amount" id="mini-jackpot">Loading...</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-secondary);">
+                            Win: 50% | Slots 2, 16 | 1 in 4,762
+                        </div>
+                    </div>
+                    
+                    <!-- Play Card -->
+                    <div class="card">
+                        <div class="entry-price">
+                            <div class="entry-price-label">Entry Price</div>
+                            <div class="entry-price-value" id="entry-price">10.00 PLS369</div>
+                        </div>
+                        
+                        <button id="play-btn" class="play-btn" disabled>
+                            Play Now
+                        </button>
+                        
+                        <div style="margin-top: 1rem; font-size: 0.75rem; color: var(--text-secondary); text-align: center;">
+                            Press ENTER or click to play
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Card -->
+                    <div class="card">
+                        <div class="card-title">📊 Game Stats</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Plays</span>
+                                <span class="stat-value" id="play-count">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">House Edge</span>
+                                <span class="stat-value">~6.9%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">RTP</span>
+                                <span class="stat-value">~93.1%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Multipliers Card -->
+                    <div class="card">
+                        <div class="card-title">🎲 Prize Multipliers</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">Slot 3</span>
+                                <span class="stat-value text-success">3×</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Slot 7</span>
+                                <span class="stat-value text-success">2×</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Slot 11</span>
+                                <span class="stat-value text-success">5×</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Slot 15</span>
+                                <span class="stat-value text-success">2×</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Slot 18</span>
+                                <span class="stat-value text-success">2×</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://scan.pulsechain.com/address/0xFBF81bFA463252e25C8883ac0E3EBae99617A52c" target="_blank" rel="noopener">
+                    View Contract
+                </a>
+                <a href="https://scan.pulsechain.com/token/0x55aC731aAa3442CE4D8bd8486eE4521B1D6Af5EC" target="_blank" rel="noopener">
+                    PLS369 Token
+                </a>
+                <a href="https://app.pulsex.com/swap" target="_blank" rel="noopener">
+                    Get PLS369
+                </a>
+            </div>
+            <p>© 2024 PLS369 DAO. Powered by PulseChain.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                Game uses Fetch Oracle for verifiable randomness. Play responsibly.
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Scripts (ES Modules) -->
+    <script type="module" src="assets/js/app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered:', reg.scope))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
