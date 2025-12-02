@@ -18,11 +18,6 @@ const STATIC_ASSETS = [
     '/contracts/abi.json'
 ];
 
-// External resources to cache
-const EXTERNAL_ASSETS = [
-    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
-];
-
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
     console.log('[ServiceWorker] Install');
@@ -76,9 +71,9 @@ self.addEventListener('fetch', (event) => {
     
     // Skip cross-origin requests except for fonts and allowed APIs
     if (url.origin !== self.location.origin) {
-        // Allow fonts
-        if (url.hostname.includes('fonts.googleapis.com') || 
-            url.hostname.includes('fonts.gstatic.com')) {
+        // Allow Google Fonts - use exact hostname matching for security
+        const allowedFontHosts = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+        if (allowedFontHosts.includes(url.hostname)) {
             event.respondWith(
                 caches.match(request)
                     .then((cachedResponse) => {

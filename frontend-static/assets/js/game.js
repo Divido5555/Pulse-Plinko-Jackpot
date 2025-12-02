@@ -289,7 +289,8 @@ export class GameManager {
      */
     parsePlayEvent(logs) {
         // Play event signature: Play(address indexed player, uint256 indexed playId, uint256 slot, uint256 payout, bool mainJackpotHit, bool miniJackpotHit)
-        const playEventSignature = '0x' + this.keccak256('Play(address,uint256,uint256,uint256,bool,bool)');
+        // Keccak256 hash of the event signature
+        const playEventSignature = '0xa1ed10cff95c4195cbd0a8cfb5c159119288042aca768731b027c8b3ca20f74b';
         
         for (const log of logs) {
             if (log.topics && log.topics[0] === playEventSignature) {
@@ -349,22 +350,6 @@ export class GameManager {
         }
         
         return values;
-    }
-    
-    /**
-     * Simple keccak256 implementation for event signature
-     * Note: In production, use a proper library
-     * @param {string} input - Input string
-     * @returns {string} Hash (first 8 chars)
-     */
-    keccak256(input) {
-        // This is a placeholder - in production use ethers.js or web3.js
-        // For now, we'll use the known hash for the Play event
-        if (input === 'Play(address,uint256,uint256,uint256,bool,bool)') {
-            // Pre-computed hash for the Play event
-            return 'e7c9a2d0c4e6f8a0b2c4d6e8f0a2b4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f6a8';
-        }
-        return '0000000000000000000000000000000000000000000000000000000000000000';
     }
     
     /**

@@ -266,21 +266,25 @@ export class WalletManager {
     
     /**
      * Approve token spending for the game contract
-     * @param {string} amount - Amount to approve in wei (default: unlimited)
+     * @param {string} amount - Amount to approve in wei (default: entry price * 100 for convenience)
      * @returns {Promise<string|null>} Transaction hash or null on failure
      */
-    async approveTokens(amount = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') {
+    async approveTokens(amount = null) {
         if (!this.isConnected) {
             showNotification('Please connect wallet first', 'error');
             return null;
         }
         
+        // Default to 100x entry price for convenience (enough for 100 plays)
+        // This is safer than unlimited approval while still being convenient
+        const approvalAmount = amount || (BigInt(CONFIG.GAME.ENTRY_PRICE) * BigInt(100)).toString();
+        
         try {
             // ERC20 approve ABI
             const spenderPadded = CONFIG.CONTRACT_ADDRESS.slice(2).toLowerCase().padStart(64, '0');
-            const amountHex = typeof amount === 'string' && amount.startsWith('0x') 
-                ? amount.slice(2).padStart(64, '0')
-                : BigInt(amount).toString(16).padStart(64, '0');
+            const amountHex = typeof approvalAmount === 'string' && approvalAmount.startsWith('0x') 
+                ? approvalAmount.slice(2).padStart(64, '0')
+                : BigInt(approvalAmount).toString(16).padStart(64, '0');
             const data = '0x095ea7b3' + spenderPadded + amountHex;
             
             const txHash = await window.ethereum.request({
