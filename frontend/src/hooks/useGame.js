@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Contract, formatUnits, parseUnits, MaxUint256 } from 'ethers';
+import { Contract, formatUnits, MaxUint256 } from 'ethers';
 import { 
   CONTRACT_ADDRESSES, 
   PLS369_TOKEN_ABI, 
   PLINKO_GAME_ABI,
   ENTRY_PRICE 
 } from '../config/contracts';
+
+// Default approval amount: 1000 plays worth of tokens (10,000 PLS369)
+const DEFAULT_APPROVAL_AMOUNT = ENTRY_PRICE * 1000n;
 
 export const useGame = (provider, signer, address) => {
   const [gameState, setGameState] = useState({
@@ -95,7 +98,7 @@ export const useGame = (provider, signer, address) => {
   }, [provider, address, getContracts]);
 
   // Approve tokens for the game contract
-  const approveTokens = useCallback(async (amount = MaxUint256) => {
+  const approveTokens = useCallback(async (amount = DEFAULT_APPROVAL_AMOUNT) => {
     if (!signer || !address) {
       setError('Wallet not connected');
       return false;

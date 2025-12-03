@@ -13,6 +13,7 @@ import { useWallet } from '../hooks/useWallet';
 import { useGame } from '../hooks/useGame';
 import { WIN_SLOTS, MINI_JACKPOT_INDICES, MAIN_JACKPOT_INDEX } from '../config/slots';
 import { ENTRY_PRICE_DISPLAY } from '../config/contracts';
+import { safeParseNumber, formatTokenAmount } from '@/lib/utils';
 import '@/styles/pulse369.css';
 import '@/styles/wallet.css';
 
@@ -67,7 +68,7 @@ const PlinkoGame369 = () => {
     }
 
     // Check balance
-    const balance = parseFloat(wallet.pls369Balance);
+    const balance = safeParseNumber(wallet.pls369Balance, 0);
     if (balance < 10) {
       toast.error('Insufficient balance', {
         description: `You need ${ENTRY_PRICE_DISPLAY} to play`,
@@ -118,7 +119,7 @@ const PlinkoGame369 = () => {
       return;
     }
 
-    const payout = parseFloat(result.payout);
+    const payout = safeParseNumber(result.payout, 0);
     const isWin = payout > 0 || result.mainJackpotHit || result.miniJackpotHit;
 
     // Update session stats
@@ -134,18 +135,18 @@ const PlinkoGame369 = () => {
       if (result.mainJackpotHit) {
         setBanner({ kind: 'main', text: 'MAIN JACKPOT!!!' });
         toast.success('MAIN JACKPOT WON!', {
-          description: `You won ${payout.toLocaleString()} PLS369!`,
+          description: `You won ${formatTokenAmount(payout)} PLS369!`,
         });
       } else if (result.miniJackpotHit) {
         setBanner({ kind: 'mini', text: 'MINI JACKPOT!' });
         toast.success('MINI JACKPOT WON!', {
-          description: `You won ${payout.toLocaleString()} PLS369!`,
+          description: `You won ${formatTokenAmount(payout)} PLS369!`,
         });
       } else if (payout > 0) {
         const multiplier = WIN_SLOTS[result.slot] || 1;
-        setBanner({ kind: 'win', text: `WIN ${payout.toLocaleString()} PLS369!` });
+        setBanner({ kind: 'win', text: `WIN ${formatTokenAmount(payout)} PLS369!` });
         toast.success(`You won ${multiplier}x!`, {
-          description: `${payout.toLocaleString()} PLS369 - Slot ${result.slot}`,
+          description: `${formatTokenAmount(payout)} PLS369 - Slot ${result.slot}`,
         });
       } else if (result.slot === MAIN_JACKPOT_INDEX) {
         setBanner({ kind: 'lose', text: 'So close! Main jackpot slot!' });
@@ -190,8 +191,8 @@ const PlinkoGame369 = () => {
 
       <div className="content-wrapper">
         <GameHeader
-          miniAmountPLS369={parseFloat(game.gameState.miniJackpot).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-          mainAmountPLS369={parseFloat(game.gameState.mainJackpot).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          miniAmountPLS369={formatTokenAmount(game.gameState.miniJackpot)}
+          mainAmountPLS369={formatTokenAmount(game.gameState.mainJackpot)}
           isConnected={wallet.isConnected}
           isConnecting={wallet.isConnecting}
           formattedAddress={wallet.formattedAddress}
@@ -209,8 +210,8 @@ const PlinkoGame369 = () => {
               isBallFalling={isBallFalling}
               onLaunch={handleLaunch}
               onBallLanded={handleBallLanded}
-              miniAmountPLS369={parseFloat(game.gameState.miniJackpot).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-              mainAmountPLS369={parseFloat(game.gameState.mainJackpot).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              miniAmountPLS369={formatTokenAmount(game.gameState.miniJackpot)}
+              mainAmountPLS369={formatTokenAmount(game.gameState.mainJackpot)}
               finalSlot={finalSlot}
               isPlaying={game.isPlaying}
             />
@@ -247,15 +248,15 @@ const PlinkoGame369 = () => {
               <CardContent>
                 <div className="stat-row">
                   <span>Total Plays</span>
-                  <span className="stat-value">{parseInt(game.gameState.playCount).toLocaleString()}</span>
+                  <span className="stat-value">{safeParseNumber(game.gameState.playCount, 0).toLocaleString()}</span>
                 </div>
                 <div className="stat-row">
                   <span>Main Jackpot</span>
-                  <span className="stat-value purple">{parseFloat(game.gameState.mainJackpot).toLocaleString(undefined, { maximumFractionDigits: 2 })} PLS369</span>
+                  <span className="stat-value purple">{formatTokenAmount(game.gameState.mainJackpot)} PLS369</span>
                 </div>
                 <div className="stat-row">
                   <span>Mini Jackpot</span>
-                  <span className="stat-value green">{parseFloat(game.gameState.miniJackpot).toLocaleString(undefined, { maximumFractionDigits: 2 })} PLS369</span>
+                  <span className="stat-value green">{formatTokenAmount(game.gameState.miniJackpot)} PLS369</span>
                 </div>
               </CardContent>
             </Card>

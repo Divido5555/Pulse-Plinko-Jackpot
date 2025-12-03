@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet, TrendingUp, TrendingDown, PlayCircle, CheckCircle, AlertCircle } from 'lucide-react';
 import { ENTRY_PRICE_DISPLAY } from '../config/contracts';
+import { safeParseNumber, formatTokenAmount } from '@/lib/utils';
 
 const PlayerWallet = ({ 
   pls369Balance,
@@ -13,7 +14,7 @@ const PlayerWallet = ({
   sessionStats,
   error,
 }) => {
-  const balance = parseFloat(pls369Balance) || 0;
+  const balance = safeParseNumber(pls369Balance, 0);
   const canPlay = balance >= 10; // 10 PLS369 entry fee
   const profitLoss = sessionStats.totalWinnings - sessionStats.totalSpent;
   const isProfit = profitLoss >= 0;
@@ -51,7 +52,7 @@ const PlayerWallet = ({
         <div className="balance-display">
           <div className="balance-label">PLS369 Balance</div>
           <div className="balance-amount">
-            {balance.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="balance-currency">PLS369</span>
+            {formatTokenAmount(balance)} <span className="balance-currency">PLS369</span>
           </div>
           <div className="balance-games">
             {canPlay ? (
@@ -114,7 +115,7 @@ const PlayerWallet = ({
               <div className="stat-label">Profit/Loss</div>
               <div className={`stat-value ${isProfit ? 'green' : 'red'}`}>
                 {isProfit ? <TrendingUp className="w-4 h-4 inline" /> : <TrendingDown className="w-4 h-4 inline" />}
-                {isProfit ? '+' : ''}{profitLoss.toLocaleString(undefined, { maximumFractionDigits: 2 })} PLS369
+                {isProfit ? '+' : ''}{formatTokenAmount(profitLoss)} PLS369
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Wallet, LogOut, AlertCircle } from 'lucide-react';
+import { formatTokenAmount } from '@/lib/utils';
 
 const WalletButton = ({ 
   isConnected, 
@@ -40,7 +41,7 @@ const WalletButton = ({
           </span>
         )}
         <div className="wallet-info">
-          <span className="wallet-balance">{parseFloat(pls369Balance).toLocaleString(undefined, { maximumFractionDigits: 2 })} PLS369</span>
+          <span className="wallet-balance">{formatTokenAmount(pls369Balance)} PLS369</span>
           <span className="wallet-address">{formattedAddress}</span>
         </div>
         <Button 
