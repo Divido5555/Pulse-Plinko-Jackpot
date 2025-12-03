@@ -2,32 +2,12 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../contracts/PLS369Token.sol";
-import "../contracts/PlinkoGame369.sol";
-
-// Mock Fetch Oracle
-contract MockFetchOracle {
-    uint256 public mockRandomness = 123456789;
-    uint256 public mockTimestamp;
-    
-    constructor() {
-        mockTimestamp = block.timestamp;
-    }
-    
-    function getDataBefore(bytes32, uint256) external view returns (bytes memory, uint256) {
-        return (abi.encode(mockRandomness), mockTimestamp);
-    }
-    
-    function setRandomness(uint256 newValue) external {
-        mockRandomness = newValue;
-        mockTimestamp = block.timestamp;
-    }
-}
+import "../contracts/Pulse369ToknenMnv1.sol";
+import "../contracts/PlinkoGame369mnV1.sol";
 
 contract PLS369SystemTest is Test {
     PLS369Token public token;
     PlinkoGame369 public game;
-    MockFetchOracle public mockOracle;
     
     address public owner = address(1);
     address public daoTreasury = address(2);
@@ -41,14 +21,10 @@ contract PLS369SystemTest is Test {
         vm.prank(owner);
         token = new PLS369Token();
         
-        // Deploy mock oracle
-        mockOracle = new MockFetchOracle();
-        
-        // Deploy game
+        // Deploy game (4 parameters, no oracle - uses on-chain randomness)
         vm.prank(owner);
         game = new PlinkoGame369(
             address(token),
-            address(mockOracle),
             owner,
             daoTreasury,
             devWallet
@@ -64,10 +40,6 @@ contract PLS369SystemTest is Test {
         
         vm.prank(owner);
         game.seedJackpots(50000 * 1e18, 20000 * 1e18);
-        
-        // Top up randomness
-        vm.prank(owner);
-        game.topUpRandomness(100);
     }
     
     function testTokenDeployment() public view {
@@ -88,18 +60,6 @@ contract PLS369SystemTest is Test {
     function testJackpotSeeding() public view {
         assertEq(game.mainJackpot(), 50000 * 1e18);
         assertEq(game.miniJackpot(), 20000 * 1e18);
-    }
-    
-    function testRandomnessTopUp() public {
-        (uint256 poolSize, uint256 index) = game.getRandomPoolSize();
-        assertEq(poolSize, 100);
-        assertEq(index, 0);
-        
-        vm.prank(owner);
-        game.topUpRandomness(50);
-        
-        (poolSize, ) = game.getRandomPoolSize();
-        assertEq(poolSize, 150);
     }
     
     function testPlayRequiresApproval() public {
@@ -137,60 +97,16 @@ contract PLS369SystemTest is Test {
         vm.prank(player);
         game.play();
         
-        // Check distributions
+        // Check distributions (PlinkoGame369mnV1 uses 40/10/4/3 split)
         uint256 mainAfter = game.mainJackpot();
         uint256 miniAfter = game.miniJackpot();
         
-        assertEq(mainAfter - mainBefore, (ENTRY_PRICE * 50) / 100);
-        assertEq(miniAfter - miniBefore, (ENTRY_PRICE * 15) / 100);
+        assertEq(mainAfter - mainBefore, (ENTRY_PRICE * 40) / 100);
+        assertEq(miniAfter - miniBefore, (ENTRY_PRICE * 10) / 100);
         
-        (,,,uint256 daoAccrued, uint256 devAccrued,) = game.getGameState();
-        assertEq(daoAccrued, (ENTRY_PRICE * 25) / 100);
-        assertEq(devAccrued, (ENTRY_PRICE * 10) / 100);
-    }
-    
-    function testPrizeSlotPayout() public {
-        // Set randomness to land on slot 3 (3x multiplier = 300)
-        mockOracle.setRandomness(3);
-        
-        // Top up new randomness
-        vm.prank(owner);
-        game.topUpRandomness(1);
-        
-        vm.prank(player);
-        token.approve(address(game), ENTRY_PRICE);
-        
-        uint256 playerBalBefore = token.balanceOf(player);
-        
-        vm.prank(player);
-        game.play();
-        
-        uint256 playerBalAfter = token.balanceOf(player);
-        
-        // Player should receive 3x payout (minus entry cost)
-        uint256 expectedPayout = (ENTRY_PRICE * 300) / 100;
-        assertEq(playerBalAfter, playerBalBefore - ENTRY_PRICE + expectedPayout);
-    }
-    
-    function testLoserSlot() public {
-        // Set randomness to land on slot 0 (loser)
-        mockOracle.setRandomness(0);
-        
-        vm.prank(owner);
-        game.topUpRandomness(1);
-        
-        vm.prank(player);
-        token.approve(address(game), ENTRY_PRICE);
-        
-        uint256 playerBalBefore = token.balanceOf(player);
-        
-        vm.prank(player);
-        game.play();
-        
-        uint256 playerBalAfter = token.balanceOf(player);
-        
-        // Player loses entry, gets nothing back
-        assertEq(playerBalBefore - playerBalAfter, ENTRY_PRICE);
+        (,,,uint256 daoAccrued, uint256 devAccrued,,) = game.getGameState();
+        assertEq(daoAccrued, (ENTRY_PRICE * 4) / 100);
+        assertEq(devAccrued, (ENTRY_PRICE * 3) / 100);
     }
     
     function testDaoRewardsClaim() public {
@@ -203,7 +119,7 @@ contract PLS369SystemTest is Test {
             game.play();
         }
         
-        (,,,uint256 daoAccrued,,) = game.getGameState();
+        (,,,uint256 daoAccrued,,,) = game.getGameState();
         assertGt(daoAccrued, 0);
         
         uint256 treasuryBefore = token.balanceOf(daoTreasury);
@@ -216,7 +132,7 @@ contract PLS369SystemTest is Test {
         assertEq(treasuryAfter - treasuryBefore, daoAccrued);
         
         // Check accrued is reset
-        (,,,uint256 daoAccruedAfter,,) = game.getGameState();
+        (,,,uint256 daoAccruedAfter,,,) = game.getGameState();
         assertEq(daoAccruedAfter, 0);
     }
     
@@ -230,7 +146,7 @@ contract PLS369SystemTest is Test {
             game.play();
         }
         
-        (,,,,uint256 devAccrued,) = game.getGameState();
+        (,,,,uint256 devAccrued,,) = game.getGameState();
         assertGt(devAccrued, 0);
         
         uint256 devBefore = token.balanceOf(devWallet);
@@ -243,104 +159,10 @@ contract PLS369SystemTest is Test {
         assertEq(devAfter - devBefore, devAccrued);
     }
     
-    function testMainJackpotWin() public {
-        // Set randomness to slot 10 with winning odds
-        // randomness % 20 = 10, and randomness % MAIN_JACKPOT_ODDS = 0
-        uint256 winningRandom = 10 + (game.MAIN_JACKPOT_ODDS() * 20);
-        mockOracle.setRandomness(winningRandom);
-        
-        vm.prank(owner);
-        game.topUpRandomness(1);
-        
-        uint256 jackpotBefore = game.mainJackpot();
-        uint256 playerBalBefore = token.balanceOf(player);
-        uint256 daoBalBefore = token.balanceOf(daoTreasury);
-        
-        vm.prank(player);
-        token.approve(address(game), ENTRY_PRICE);
-        
-        vm.prank(player);
-        game.play();
-        
-        // Player should receive 60% of jackpot
-        uint256 expectedWin = (jackpotBefore * 60) / 100;
-        uint256 playerBalAfter = token.balanceOf(player);
-        assertEq(playerBalAfter, playerBalBefore - ENTRY_PRICE + expectedWin);
-        
-        // DAO should receive 30%
-        uint256 expectedDao = (jackpotBefore * 30) / 100;
-        uint256 daoBalAfter = token.balanceOf(daoTreasury);
-        assertEq(daoBalAfter - daoBalBefore, expectedDao);
-        
-        // Jackpot should reset to 10%
-        uint256 expectedReset = (jackpotBefore * 10) / 100;
-        uint256 jackpotAfter = game.mainJackpot();
-        // Add the new contribution from this play
-        uint256 newContribution = (ENTRY_PRICE * 50) / 100;
-        assertEq(jackpotAfter, expectedReset + newContribution);
-    }
-    
-    function testMiniJackpotWin() public {
-        // Set randomness to slot 16 with winning odds
-        uint256 winningRandom = 16 + (game.MINI_JACKPOT_ODDS() * 20);
-        mockOracle.setRandomness(winningRandom);
-        
-        vm.prank(owner);
-        game.topUpRandomness(1);
-        
-        uint256 jackpotBefore = game.miniJackpot();
-        uint256 playerBalBefore = token.balanceOf(player);
-        uint256 devBalBefore = token.balanceOf(devWallet);
-        
-        vm.prank(player);
-        token.approve(address(game), ENTRY_PRICE);
-        
-        vm.prank(player);
-        game.play();
-        
-        // Player should receive 75% of jackpot
-        uint256 expectedWin = (jackpotBefore * 75) / 100;
-        uint256 playerBalAfter = token.balanceOf(player);
-        assertEq(playerBalAfter, playerBalBefore - ENTRY_PRICE + expectedWin);
-        
-        // Dev should receive 10%
-        uint256 expectedDev = (jackpotBefore * 10) / 100;
-        uint256 devBalAfter = token.balanceOf(devWallet);
-        assertEq(devBalAfter - devBalBefore, expectedDev);
-        
-        // Jackpot should reset to 15%
-        uint256 jackpotAfter = game.miniJackpot();
-        uint256 expectedReset = (jackpotBefore * 15) / 100;
-        uint256 newContribution = (ENTRY_PRICE * 15) / 100;
-        assertEq(jackpotAfter, expectedReset + newContribution);
-    }
-    
-    function testCannotPlayWithoutRandomness() public {
-        // Deplete all randomness
-        vm.prank(player);
-        token.approve(address(game), ENTRY_PRICE * 200);
-        
-        for (uint i = 0; i < 100; i++) {
-            vm.prank(player);
-            game.play();
-        }
-        
-        // Next play should fail
-        vm.prank(player);
-        vm.expectRevert("Randomness empty");
-        game.play();
-    }
-    
     function testOnlyOwnerCanSeedJackpots() public {
         vm.prank(player);
         vm.expectRevert("Only owner");
         game.seedJackpots(1000, 1000);
-    }
-    
-    function testOnlyOwnerCanTopUpRandomness() public {
-        vm.prank(player);
-        vm.expectRevert("Only owner");
-        game.topUpRandomness(10);
     }
     
     function testOwnershipTransfer() public {

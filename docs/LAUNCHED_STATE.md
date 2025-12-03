@@ -45,7 +45,7 @@ House edge is small but positive to the DAO over time.
 
 ## Smart Contracts (Code Layout Target)
 
-- `/contracts/PLS369Token.sol` – fixed supply ERC-20 (matching deployed bytecode).
+- `/contracts/Pulse369ToknenMnv1.sol` – fixed supply ERC-20 (matching deployed bytecode).
 - `/contracts/PlinkoGame369mnV1.sol` – game contract matching
   `0xFBF81bFA463252e25C8883ac0E3EBae99617A52c`.
 - Any other contracts in `/contracts` are **either support libs** or **legacy**.

@@ -2,13 +2,12 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../contracts/PLS369Token.sol";
-import "../contracts/PlinkoGame369.sol";
+import "../contracts/Pulse369ToknenMnv1.sol";
+import "../contracts/PlinkoGame369mnV1.sol";
 
 contract DeployPLS369System is Script {
     function run() external {
         // Load environment variables
-        address fetchOracle = vm.envAddress("FETCH_ORACLE_ADDRESS");
         address owner = vm.envOr("OWNER_ADDRESS", msg.sender);
         address daoTreasury = vm.envAddress("DAO_TREASURY");
         address devWallet = vm.envAddress("DEV_WALLET");
@@ -18,7 +17,6 @@ contract DeployPLS369System is Script {
         console.log("========================================\n");
         
         console.log("Deployer:", msg.sender);
-        console.log("Fetch Oracle:", fetchOracle);
         console.log("Owner:", owner);
         console.log("DAO Treasury:", daoTreasury);
         console.log("Dev Wallet:", devWallet);
@@ -32,11 +30,10 @@ contract DeployPLS369System is Script {
         console.log("PLS369Token deployed to:", address(token));
         console.log("Total Supply:", token.totalSupply() / 1e18, "PLS369\n");
         
-        // Deploy PlinkoGame369
+        // Deploy PlinkoGame369 (4 parameters, no oracle - uses on-chain randomness)
         console.log("Deploying PlinkoGame369...");
         PlinkoGame369 game = new PlinkoGame369(
             address(token),
-            fetchOracle,
             owner,
             daoTreasury,
             devWallet
@@ -54,13 +51,12 @@ contract DeployPLS369System is Script {
         
         console.log("\nGame Configuration:");
         console.log("  Entry Price:", game.ENTRY_PRICE() / 1e18, "PLS369");
-        console.log("  Main Jackpot Odds: 1 in", game.MAIN_JACKPOT_ODDS());
-        console.log("  Mini Jackpot Odds: 1 in", game.MINI_JACKPOT_ODDS());
+        console.log("  Main Jackpot Odds: 1 in", game.mainJackpotOdds());
+        console.log("  Mini Jackpot Odds: 1 in", game.miniJackpotOdds());
         
         console.log("\nNext Steps:");
         console.log("1. Transfer tokens to game for seeding");
         console.log("2. Call game.seedJackpots(mainAmount, miniAmount)");
-        console.log("3. Call game.topUpRandomness(1000) for initial plays");
-        console.log("4. Update frontend with contract addresses");
+        console.log("3. Update frontend with contract addresses");
     }
 }

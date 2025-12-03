@@ -26,14 +26,10 @@ async function main() {
   // ===== STEP 2: Load Game Contract Parameters =====
   console.log("📦 Step 2: Loading PlinkoGame369 parameters...");
   
-  const FETCH_ORACLE_ADDRESS = process.env.FETCH_ORACLE_ADDRESS;
   const OWNER_ADDRESS = process.env.OWNER_ADDRESS || deployer.address;
   const DAO_TREASURY = process.env.DAO_TREASURY;
   const DEV_WALLET = process.env.DEV_WALLET;
 
-  if (!FETCH_ORACLE_ADDRESS) {
-    throw new Error("❌ FETCH_ORACLE_ADDRESS not set in .env");
-  }
   if (!DAO_TREASURY) {
     throw new Error("❌ DAO_TREASURY not set in .env");
   }
@@ -43,17 +39,15 @@ async function main() {
 
   console.log("Configuration:");
   console.log("   Token:", tokenAddress);
-  console.log("   Fetch Oracle:", FETCH_ORACLE_ADDRESS);
   console.log("   Owner:", OWNER_ADDRESS);
   console.log("   DAO Treasury:", DAO_TREASURY);
   console.log("   Dev Wallet:", DEV_WALLET, "\n");
 
-  // ===== STEP 3: Deploy PlinkoGame369 =====
+  // ===== STEP 3: Deploy PlinkoGame369 (4 parameters, no oracle - uses on-chain randomness) =====
   console.log("📦 Step 3: Deploying PlinkoGame369...");
   const PlinkoGame369 = await ethers.getContractFactory("PlinkoGame369");
   const plinkoGame = await PlinkoGame369.deploy(
     tokenAddress,
-    FETCH_ORACLE_ADDRESS,
     OWNER_ADDRESS,
     DAO_TREASURY,
     DEV_WALLET
@@ -73,8 +67,8 @@ async function main() {
   console.log("\n📊 Game Configuration:");
   const entryPrice = await plinkoGame.ENTRY_PRICE();
   console.log("   Entry Price:    ", ethers.formatEther(entryPrice), "PLS369");
-  console.log("   Main Jackpot Odds: 1 in", (await plinkoGame.MAIN_JACKPOT_ODDS()).toString());
-  console.log("   Mini Jackpot Odds: 1 in", (await plinkoGame.MINI_JACKPOT_ODDS()).toString());
+  console.log("   Main Jackpot Odds: 1 in", (await plinkoGame.mainJackpotOdds()).toString());
+  console.log("   Mini Jackpot Odds: 1 in", (await plinkoGame.miniJackpotOdds()).toString());
 
   console.log("\n🎯 Next Steps:");
   console.log("1. Transfer PLS369 tokens to game for seeding:");
@@ -83,19 +77,16 @@ async function main() {
   console.log("2. Seed jackpots (as owner):");
   console.log("   plinkoGame.seedJackpots(mainAmount, miniAmount)");
   console.log("");
-  console.log("3. Top up randomness (as owner):");
-  console.log("   plinkoGame.topUpRandomness(1000)  // 1000 plays worth");
-  console.log("");
-  console.log("4. Distribute tokens to:");
+  console.log("3. Distribute tokens to:");
   console.log("   - Liquidity Pool (for PLS/PLS369 pair)");
   console.log("   - Community distribution");
   console.log("   - Team vesting");
   console.log("");
-  console.log("5. Update frontend .env:");
+  console.log("4. Update frontend .env:");
   console.log(`   REACT_APP_PLS369_TOKEN=${tokenAddress}`);
   console.log(`   REACT_APP_PLINKO369_GAME=${gameAddress}`);
   console.log("");
-  console.log("6. Players need to:");
+  console.log("5. Players need to:");
   console.log("   a. Get PLS369 tokens (buy from LP or receive from DAO)");
   console.log("   b. Approve game contract: pls369.approve(gameAddress, amount)");
   console.log("   c. Play: plinkoGame.play()");
