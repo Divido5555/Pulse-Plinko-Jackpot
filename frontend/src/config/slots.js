@@ -1,39 +1,47 @@
-// Slot configuration for Plinko game - 24 total slots
+// Slot configuration for Plinko game - 20 total slots
+// Matches the deployed PlinkoGame369 contract multipliers
 import { TOKEN_IMAGES } from './tokenAssets';
 
 export const SLOTS = [
   { index: 0,  kind: "lose" },
-  { index: 1,  kind: "win", token: "PLS",    multiplier: 1.1 },
-  { index: 2,  kind: "lose" },
-  { index: 3,  kind: "lose" },
+  { index: 1,  kind: "lose" },
+  { index: 2,  kind: "mini-jackpot" },  // Mini jackpot slot
+  { index: 3,  kind: "win", multiplier: 3 },  // 3x
   { index: 4,  kind: "lose" },
   { index: 5,  kind: "lose" },
-
-  { index: 6,  kind: "win", token: "PLSX",   multiplier: 1.5 },
-  { index: 7,  kind: "lose" },
+  { index: 6,  kind: "lose" },
+  { index: 7,  kind: "win", multiplier: 2 },  // 2x
   { index: 8,  kind: "lose" },
   { index: 9,  kind: "lose" },
-  { index: 10, kind: "lose" },
-
-  { index: 11, kind: "win", token: "HEX",    multiplier: 2.0 },
+  { index: 10, kind: "main-jackpot" },  // Main jackpot slot
+  { index: 11, kind: "win", multiplier: 5 },  // 5x
   { index: 12, kind: "lose" },
   { index: 13, kind: "lose" },
   { index: 14, kind: "lose" },
-
-  { index: 15, kind: "win", token: "INC",    multiplier: 3.0 },
-  { index: 16, kind: "lose" },
+  { index: 15, kind: "win", multiplier: 2 },  // 2x
+  { index: 16, kind: "mini-jackpot" },  // Mini jackpot slot
   { index: 17, kind: "lose" },
-  { index: 18, kind: "lose" },
-
-  { index: 19, kind: "win", token: "PROVEX", multiplier: 5.0 },
-  { index: 20, kind: "lose" },
-  { index: 21, kind: "lose" },
-  { index: 22, kind: "lose" },
-  { index: 23, kind: "lose" },
+  { index: 18, kind: "win", multiplier: 2 },  // 2x
+  { index: 19, kind: "lose" },
 ];
 
-// Mini jackpot can visually hop to any losing slot
-export const MINI_CANDIDATE_INDICES = [0, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 14, 16, 17, 18, 20, 21, 22, 23];
+// Total slot count
+export const TOTAL_SLOTS = 20;
+
+// Mini jackpot slots (indices)
+export const MINI_JACKPOT_INDICES = [2, 16];
+
+// Main jackpot slot (index)
+export const MAIN_JACKPOT_INDEX = 10;
+
+// Win slots with their multipliers
+export const WIN_SLOTS = {
+  3: 3,   // 3x
+  7: 2,   // 2x
+  11: 5,  // 5x
+  15: 2,  // 2x
+  18: 2,  // 2x
+};
 
 // Export token images for use in components
 export const TOKEN_LOGOS = TOKEN_IMAGES;
