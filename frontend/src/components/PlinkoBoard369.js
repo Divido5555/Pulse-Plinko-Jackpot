@@ -1,26 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
+import { SLOTS, TOTAL_SLOTS, MINI_JACKPOT_INDICES, MAIN_JACKPOT_INDEX, WIN_SLOTS } from '../config/slots';
 import { PULSE369_LOGO } from '../config/tokenAssets';
 import BLOCKER_SVG from '../assets/blocker.svg';
-
-const ENTRY_FEE_PLS = 10000;
 
 const PlinkoBoard369 = ({
   isBallFalling,
   onLaunch,
   onBallLanded,
-  miniAmountPLS,
+  miniAmountPLS369,
+  mainAmountPLS369,
   finalSlot,
-  onJackpotIndicesChange,
+  isPlaying,
 }) => {
-  const [miniIndex, setMiniIndex] = useState(
-    () => MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)]
-  );
-  
-  const [mainIndex, setMainIndex] = useState(
-    () => MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)]
-  );
-
   const [isDragging, setIsDragging] = useState(false);
   const [puckPosition, setPuckPosition] = useState({ x: 50, y: 3 });
   const [isAnimating, setIsAnimating] = useState(false);
@@ -36,7 +27,7 @@ const PlinkoBoard369 = ({
   useEffect(() => {
     const pegs = [];
     const numRows = 19; // 19 rows with expanded spacing
-    const numColumns = 20; // 20 columns matching reference
+    const numColumns = TOTAL_SLOTS; // 20 columns matching contract
     
     const boardWidth = 90; // Use 90% of board width
     const boardHeight = 80; // Use 80% of board height
@@ -101,24 +92,6 @@ const PlinkoBoard369 = ({
     setBlockerPositions(blockers);
   }, []);
 
-  // Shuffle badges
-  useEffect(() => {
-    if (!isBallFalling && !isAnimating) {
-      const miniIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
-      setMiniIndex(miniIdx);
-      
-      let mainIdx;
-      do {
-        mainIdx = MINI_CANDIDATE_INDICES[Math.floor(Math.random() * MINI_CANDIDATE_INDICES.length)];
-      } while (mainIdx === miniIdx);
-      setMainIndex(mainIdx);
-      
-      if (onJackpotIndicesChange) {
-        onJackpotIndicesChange(miniIdx, mainIdx);
-      }
-    }
-  }, [isBallFalling, isAnimating, onJackpotIndicesChange]);
-
   const handlePuckDragStart = (e) => {
     if (isAnimating || isBallFalling) return;
     setIsDragging(true);
@@ -137,16 +110,16 @@ const PlinkoBoard369 = ({
     const x = ((clientX - rect.left) / rect.width) * 100;
     const y = ((clientY - rect.top) / rect.height) * 100;
     
-    // Restrict puck to columns 2-19 only (simulating bumper blocking)
+    // Restrict puck to columns 2-17 only (simulating bumper blocking for 20 slots)
     // Calculate exact column boundaries based on 20 columns
     const boardWidth = 90;
     const startX = 5;
-    const columnWidth = boardWidth / 20;
+    const columnWidth = boardWidth / TOTAL_SLOTS;
     
     // Column 2 starts at: startX + (1 * columnWidth) + (columnWidth/2) to center
     const minX = startX + (1.5 * columnWidth); // Middle of column 2
-    // Column 19 ends at: startX + (19 * columnWidth) - (columnWidth/2)
-    const maxX = startX + (18.5 * columnWidth); // Middle of column 19
+    // Column 17 ends at: startX + (17 * columnWidth) - (columnWidth/2)
+    const maxX = startX + (18.5 * columnWidth); // Middle of column 18
     
     setPuckPosition({ 
       x: Math.max(minX, Math.min(maxX, x)), 
@@ -288,13 +261,13 @@ const PlinkoBoard369 = ({
       
       // Check if reached bottom (90% down)
       if (currentY >= 90) {
-        // Map X position to slot (24 slots)
-        const slotIndex = Math.round((currentX / 100) * 23);
-        const finalSlot = Math.max(0, Math.min(23, slotIndex));
+        // Map X position to slot (20 slots)
+        const slotIndex = Math.round((currentX / 100) * (TOTAL_SLOTS - 1));
+        const finalSlotIndex = Math.max(0, Math.min(TOTAL_SLOTS - 1, slotIndex));
         
-        setLandedSlot(finalSlot);
+        setLandedSlot(finalSlotIndex);
         setTimeout(() => {
-          onBallLanded(finalSlot);
+          onBallLanded(finalSlotIndex);
           setIsAnimating(false);
           setPuckPosition({ x: 50, y: 3 });
           velocityRef.current = { vx: 0, vy: 0 };
@@ -326,11 +299,12 @@ const PlinkoBoard369 = ({
       onTouchMove={handlePuckDrag}
       onTouchEnd={handlePuckDragEnd}
     >
-      <div className="mini-banner-top">
-        <span className="mini-chip">MINI</span>
-        <b>{miniAmountPLS} PLS</b> • 
-        <span className="main-chip">MAIN</span>
-        <b>Moving</b> — both move each play
+      <div className="jackpot-banner-top">
+        <span className="mini-chip">MINI JACKPOT</span>
+        <b>{miniAmountPLS369} PLS369</b>
+        <span className="divider">|</span>
+        <span className="main-chip">MAIN JACKPOT</span>
+        <b>{mainAmountPLS369} PLS369</b>
       </div>
 
       {/* Extended Plinko Pegs Area with Staggered Layout */}
@@ -377,39 +351,46 @@ const PlinkoBoard369 = ({
         </div>
       </div>
 
-      {/* 24 Slots at Bottom */}
-      <div className="slots-row-24">
-        {SLOTS.map((s) => (
-          <div
-            key={s.index}
-            data-testid={`slot-${s.index}`}
-            className={`slot ${s.kind} ${landedSlot === s.index ? 'landed' : ''}`}
-          >
-            {s.kind === 'win' ? (
-              <>
-                <img src={TOKEN_LOGOS[s.token]} alt={s.token} className="logo" />
-                <div className="mult">x{Number(s.multiplier).toFixed(1)}</div>
-              </>
-            ) : (
-              <div className="slot-peg" />
-            )}
-            {s.index === miniIndex && (
-              <div className="mini-badge" title="Mini jackpot active here">
-                MINI
-              </div>
-            )}
-            {s.index === mainIndex && (
-              <div className="main-badge" title="Main jackpot active here">
-                MAIN
-              </div>
-            )}
-          </div>
-        ))}
+      {/* 20 Slots at Bottom - matching contract configuration */}
+      <div className="slots-row-20">
+        {SLOTS.map((s) => {
+          const isWinSlot = s.kind === 'win';
+          const isMainJackpot = s.index === MAIN_JACKPOT_INDEX;
+          const isMiniJackpot = MINI_JACKPOT_INDICES.includes(s.index);
+          
+          return (
+            <div
+              key={s.index}
+              data-testid={`slot-${s.index}`}
+              className={`slot ${s.kind} ${landedSlot === s.index ? 'landed' : ''} ${isMainJackpot ? 'main-jackpot-slot' : ''} ${isMiniJackpot ? 'mini-jackpot-slot' : ''}`}
+            >
+              {isMainJackpot ? (
+                <div className="jackpot-content main">
+                  <div className="jackpot-label">MAIN</div>
+                  <div className="jackpot-amount">{mainAmountPLS369}</div>
+                </div>
+              ) : isMiniJackpot ? (
+                <div className="jackpot-content mini">
+                  <div className="jackpot-label">MINI</div>
+                  <div className="jackpot-amount">{miniAmountPLS369}</div>
+                </div>
+              ) : isWinSlot ? (
+                <div className="win-content">
+                  <div className="mult">x{s.multiplier}</div>
+                </div>
+              ) : (
+                <div className="slot-peg" />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Instructions */}
       <div className="puck-instructions">
-        {!isAnimating ? (
+        {isPlaying ? (
+          <p>Waiting for transaction...</p>
+        ) : !isAnimating ? (
           <p><strong>Drag the puck</strong> and release to drop!</p>
         ) : (
           <p>Puck falling...</p>
