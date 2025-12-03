@@ -33,7 +33,7 @@ There is **no separate emission schedule**.
 
 ## 🌐 High-Level Architecture
 
-### 1. `PLS369.sol` (Token)
+### 1. `Pulse369ToknenMnv1.sol` (Token)
 
 A fixed-supply ERC-20:
 
