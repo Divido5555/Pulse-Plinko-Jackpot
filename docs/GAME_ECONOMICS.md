@@ -169,7 +169,7 @@ This **6.9%** is divided as:
 
 **PLS369 Plinko is competitive** with traditional casino games while offering:
 - Transparency (on-chain)
-- Verifiable fairness (oracle RNG)
+- On-chain randomness (blockhash-based)
 - Community ownership (DAO)
 
 ---
@@ -257,14 +257,6 @@ Statistically unlikely (1 in 666k), but:
 - Eventually reaches minimum viable size
 - DAO reseeds to maintain excitement
 
-### Randomness Pool Depletes
-
-If owner forgets to top up randomness:
-- Play reverts with "Randomness empty"
-- Frontend warns users
-- Owner calls `topUpRandomness()`
-- Game resumes
-
 ---
 
 ## Long-Term Sustainability
@@ -278,9 +270,8 @@ If owner forgets to top up randomness:
 ### Cost Structure
 
 1. **Gas fees**: Paid by players
-2. **Oracle fees**: Minimal (batched RNG)
-3. **Development**: Funded by 3% dev take
-4. **Marketing**: Funded by DAO treasury
+2. **Development**: Funded by 3% dev take
+3. **Marketing**: Funded by DAO treasury
 
 ### Break-Even Analysis
 
