@@ -388,15 +388,15 @@ const PlinkoGame369 = () => {
 
             {/* Admin Panel (gated) */}
             {showAdmin && (
-              <AdminGate connectedAddress={connectedAddress}>
+              <AdminGate connectedAddress={account}>
                 <Card className="admin-card">
                   <CardHeader>
                     <CardTitle>Admin Panel</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-400">Host wallet only</p>
+                    <p className="text-sm text-gray-400">Owner wallet only</p>
                     <p className="text-xs text-gray-500 mt-2">
-                      Connect wallet matching HOST_ADDRESS to access controls
+                      Connect wallet matching contract owner to access controls
                     </p>
                   </CardContent>
                 </Card>
