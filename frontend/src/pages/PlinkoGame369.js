@@ -232,11 +232,6 @@ const PlinkoGame369 = () => {
       
       if (!result) {
         console.error('❌ No game result found in window._lastGameResult');
-        // Signal animation complete even if no result
-        if (animationCompleteRef.current) {
-          animationCompleteRef.current();
-          animationCompleteRef.current = null;
-        }
         return;
       }
 
