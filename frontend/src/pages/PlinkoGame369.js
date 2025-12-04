@@ -80,6 +80,11 @@ const PlinkoGame369 = () => {
     }
   };
 
+  // Save session stats to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('pulse369_session_stats', JSON.stringify(sessionStats));
+  }, [sessionStats]);
+
   // Fetch blockchain game state on mount and periodically
   useEffect(() => {
     const loadGameState = async () => {
