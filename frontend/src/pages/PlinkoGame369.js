@@ -99,31 +99,57 @@ const PlinkoGame369 = () => {
     // Clear any existing banner immediately
     setBanner(null);
     
-    // Check balance
-    if (playerBalance < ENTRY_FEE_PLS) {
-      toast.error('Insufficient balance', {
-        description: `You need ${ENTRY_FEE_PLS.toLocaleString()} PLS to play`,
+    // Check wallet connection
+    if (!isConnected) {
+      toast.error('Wallet not connected', {
+        description: 'Please connect your wallet to play',
       });
       return;
     }
 
-    // Deduct entry fee
-    setPlayerBalance(prev => prev - ENTRY_FEE_PLS);
+    // Check network
+    if (!isCorrectNetwork) {
+      toast.warning('Wrong network', {
+        description: 'Please switch to PulseChain network',
+      });
+      await switchToPulseChain();
+      return;
+    }
+
+    // Check balance
+    const balanceNum = parseFloat(balance);
+    if (balanceNum < ENTRY_PRICE_TOKENS) {
+      toast.error('Insufficient balance', {
+        description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
+      });
+      return;
+    }
+
+    // Update session stats (optimistically)
     setSessionStats(prev => ({
       ...prev,
-      totalSpent: prev.totalSpent + ENTRY_FEE_PLS,
+      totalSpent: prev.totalSpent + ENTRY_PRICE_TOKENS,
     }));
 
-    // Add to jackpots (50% to main, 15% to mini)
-    setLocalJackpots(prev => ({
-      main: prev.main + (ENTRY_FEE_PLS * 0.50),
-      mini: prev.mini + (ENTRY_FEE_PLS * 0.15),
-    }));
+    // Call smart contract play function
+    const result = await playGame();
+    
+    if (!result) {
+      // Transaction failed or was rejected
+      // Revert optimistic update
+      setSessionStats(prev => ({
+        ...prev,
+        totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
+      }));
+      return;
+    }
 
-    // Generate random slot
-    const slot = Math.floor(Math.random() * 20);
-    setFinalSlot(slot);
+    // Game result received from blockchain
+    setFinalSlot(result.slot);
     setIsBallFalling(true);
+    
+    // Store result for later processing
+    window._lastGameResult = result;
   };
 
   const handleBallLanded = async (landedSlot) => {
