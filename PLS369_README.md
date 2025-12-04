@@ -5,9 +5,9 @@
 The **PLS369 Eternal Plinko** is a fully on-chain, tokenized Plinko game designed for the PLS369 DAO ecosystem. Unlike traditional casino games, this system:
 
 - **Tokenized**: Uses PLS369 token for all gameplay (entry fees, prizes, jackpots)
-- **DAO-Governed**: The DAO treasury acts as the "house" and receives 25% of all entry fees
-- **Eternal & Immutable**: No upgrade hooks, no adjustable parameters, designed to run forever
-- **Verifiable Randomness**: Uses Fetch Oracle RNG feed for provably fair gameplay
+- **DAO-Governed**: The DAO treasury acts as the "house" and receives 4% of all entry fees
+- **Configurable Until Finalized**: Owner can adjust parameters until `finalize()` is called
+- **On-Chain Randomness**: Uses blockhash, timestamp, sender, and play count for randomness
 - **Zero PLS Usage**: No native PLS required (except gas), all payouts in PLS369
 
 ---
@@ -32,26 +32,26 @@ The **PLS369 Eternal Plinko** is a fully on-chain, tokenized Plinko game designe
 │  │          PlinkoGame369 Contract                      │  │
 │  │  ┌────────────────────────────────────────────────┐ │  │
 │  │  │  Entry: 10 PLS369 per play                     │ │  │
-│  │  │  Split: 50% main | 15% mini | 25% DAO | 10% dev│ │  │
+│  │  │  Split: 40% main | 10% mini | 4% DAO | 3% dev  │ │  │
 │  │  └────────────────────────────────────────────────┘ │  │
 │  │                                                      │  │
 │  │  ┌─────────────┐   ┌─────────────┐                 │  │
 │  │  │ Main Jackpot│   │ Mini Jackpot│                 │  │
-│  │  │ (Slot 10)   │   │ (Slot 16)   │                 │  │
+│  │  │ (Slot 10)   │   │ (Slots 2,16)│                 │  │
 │  │  └─────────────┘   └─────────────┘                 │  │
 │  │                                                      │  │
 │  │  Prize Slots: 3, 7, 11, 15, 18                     │  │
 │  │  Loser Slots: All others                           │  │
 │  └──────────────────────────────────────────────────────┘  │
 │         │                                                    │
-│         │ (uses Fetch Oracle RNG)                           │
+│         │ (uses on-chain randomness)                        │
 │         │                                                    │
 │         ▼                                                    │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │            Fetch Oracle (RNG Feed)                   │  │
-│  │  - Provides verifiable randomness                    │  │
-│  │  - Expanded locally into randomness pool             │  │
-│  │  - Topped up by DAO as needed                        │  │
+│  │           On-Chain Randomness                        │  │
+│  │  - blockhash(block.number - 1)                       │  │
+│  │  - block.timestamp + msg.sender + playCount          │  │
+│  │  - No external oracle required                       │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -75,9 +75,9 @@ The **PLS369 Eternal Plinko** is a fully on-chain, tokenized Plinko game designe
 **Eternal Plinko game contract.**
 
 - **Entry Price**: 10 PLS369 per play (fixed)
-- **Randomness**: Fetch Oracle RNG feed
+- **Randomness**: On-chain (blockhash + timestamp + sender + playCount)
 - **Economy**: Token-based, no PLS required
-- **Immutable**: No upgrade hooks
+- **Configurable**: Parameters adjustable until `finalize()` is called
 
 ---
 
@@ -88,70 +88,72 @@ The **PLS369 Eternal Plinko** is a fully on-chain, tokenized Plinko game designe
 **Entry Fee**: 10 PLS369 per play
 
 **Per-Play Distribution**:
-- 50% → Main Jackpot pool
-- 15% → Mini Jackpot pool
-- 25% → DAO Treasury (claimable)
-- 10% → Dev Wallet (claimable)
+- 40% → Main Jackpot pool
+- 10% → Mini Jackpot pool
+- 4% → DAO Treasury (claimable)
+- 3% → Dev Wallet (claimable)
+- 43% → Prize Pool (remainder)
 
 ### Prize Slots (20 slots, 0-indexed)
 
 | Slot | Type | Payout |
 |------|------|--------|
-| 0, 1, 2 | Loser | 0x |
+| 0, 1 | Loser | 0x |
+| **2** | **Mini Jackpot** | **50% of pot** |
 | **3** | **Prize** | **3.0x** |
 | 4, 5, 6 | Loser | 0x |
 | **7** | **Prize** | **2.0x** |
 | 8, 9 | Loser | 0x |
-| **10** | **Main Jackpot** | **60% of pot** |
+| **10** | **Main Jackpot** | **50% of pot** |
 | **11** | **Prize** | **5.0x** |
 | 12, 13, 14 | Loser | 0x |
 | **15** | **Prize** | **2.0x** |
-| **16** | **Mini Jackpot** | **75% of pot** |
+| **16** | **Mini Jackpot** | **50% of pot** |
 | 17 | Loser | 0x |
-| **18** | **Prize** | **3.0x** |
+| **18** | **Prize** | **2.0x** |
 | 19 | Loser | 0x |
 
 ### Jackpot Logic
 
 **Main Jackpot (Slot 10)**:
-- **Odds**: 1 in 166,667 (after landing on slot 10)
+- **Odds**: 1 in 33,333 (after landing on slot 10)
 - **Payout**:
-  - 60% → Winner
-  - 30% → DAO Treasury
-  - 10% → Stays in jackpot (reset)
+  - 50% → Winner
+  - 20% → DAO Treasury
+  - 30% → Stays in jackpot (reset)
 
-**Mini Jackpot (Slot 16)**:
-- **Odds**: 1 in 4,762 (after landing on slot 16)
+**Mini Jackpot (Slots 2 and 16)**:
+- **Odds**: 1 in 4,762 (after landing on slot 2 or 16)
 - **Payout**:
-  - 75% → Winner
+  - 50% → Winner
   - 10% → Dev Wallet
-  - 15% → Stays in jackpot (reset)
+  - 40% → Stays in jackpot (reset)
 
 ---
 
 ## Randomness System
 
-The game uses **Fetch Oracle** for randomness, which provides a single RNG seed that is expanded locally into a pool of random words.
+The game uses **on-chain randomness** generated by the `_generateRandomness()` function in the contract.
 
 ### How It Works
 
-1. **Owner** calls `topUpRandomness(rounds)` to fetch RNG seed from oracle
-2. Seed is expanded into `rounds` number of random words using `keccak256`
-3. Each `play()` consumes one random word from the pool
-4. When pool runs low, owner tops up again
+1. Each `play()` call generates randomness using on-chain data
+2. Randomness is derived from: `blockhash(block.number - 1)`, `block.timestamp`, `msg.sender`, `playCount`, and `address(this)`
+3. The result is hashed via `keccak256` to produce the final random value
+4. No external oracle or pre-filled pool required
 
 ### Advantages
 
-- **No per-play oracle cost** (gas efficient)
+- **No external dependencies** (fully on-chain)
 - **Synchronous gameplay** (instant results)
-- **Verifiable** (all randomness derived from oracle seed)
-- **Scalable** (one oracle call = many plays)
+- **Gas efficient** (no oracle calls needed)
+- **Self-sustaining** (no pool to monitor or top up)
 
 ### Considerations
 
-- Requires active monitoring to keep pool topped up
-- Oracle data must be <1 hour old
-- Local expansion is deterministic but unpredictable
+- Not as strong as a VRF (block producers could theoretically bias outcomes)
+- Acceptable for token distribution, not a regulated casino
+- Players cannot predict outcomes before their transaction is mined
 
 ---
 
@@ -159,12 +161,11 @@ The game uses **Fetch Oracle** for randomness, which provides a single RNG seed 
 
 ### Prerequisites
 
-1. **Fetch Oracle Address**: RNG feed proxy on PulseChain
-2. **DAO Wallet Addresses**:
+1. **DAO Wallet Addresses**:
    - Owner (multisig recommended)
    - DAO Treasury
    - Dev Wallet
-3. **Sufficient PLS**: For deployment gas
+2. **Sufficient PLS**: For deployment gas
 
 ### Steps
 
@@ -188,7 +189,7 @@ The game uses **Fetch Oracle** for randomness, which provides a single RNG seed 
    forge script script/DeployPLS369System.s.sol:DeployPLS369System --rpc-url $RPC --broadcast
    ```
 5. **Verify Contracts** on block explorer
-6. **Configure**: Seed jackpots, top up randomness
+6. **Configure**: Seed jackpots
 7. **Test**: Run through full gameplay cycle
 
 See `PLS369_DEPLOYMENT_CHECKLIST.md` for detailed steps.
@@ -215,21 +216,13 @@ See `PLS369_DEPLOYMENT_CHECKLIST.md` for detailed steps.
    );
    ```
 
-3. **Top Up Randomness**:
-   ```solidity
-   // As owner
-   plinkoGame.topUpRandomness(1000);  // 1000 plays worth
-   ```
-
 ### Regular Maintenance
 
 **Daily**:
-- Monitor randomness pool level
-- Check Fetch Oracle data freshness
 - Review play activity
+- Monitor jackpot levels
 
 **Weekly**:
-- Top up randomness if needed
 - Analyze game statistics
 - Community updates
 
@@ -336,17 +329,17 @@ if (mainJackpotHit) {
 ### Revenue Flows
 
 **From Gameplay**:
-- DAO receives 25% of all entry fees (plus 30% of main jackpot wins)
-- Dev receives 10% of all entry fees (plus 10% of mini jackpot wins)
-- Main jackpot grows by 50% of entry fees
-- Mini jackpot grows by 15% of entry fees
+- DAO receives 4% of all entry fees (plus 20% of main jackpot wins)
+- Dev receives 3% of all entry fees (plus 10% of mini jackpot wins)
+- Main jackpot grows by 40% of entry fees
+- Mini jackpot grows by 10% of entry fees
 
 **Example (10,000 plays)**:
 - Total wagered: 100,000 PLS369
-- DAO earns: 25,000 PLS369 (claimable)
-- Dev earns: 10,000 PLS369 (claimable)
-- Main jackpot grows by: 50,000 PLS369
-- Mini jackpot grows by: 15,000 PLS369
+- DAO earns: 4,000 PLS369 (claimable)
+- Dev earns: 3,000 PLS369 (claimable)
+- Main jackpot grows by: 40,000 PLS369
+- Mini jackpot grows by: 10,000 PLS369
 
 ---
 
@@ -354,35 +347,45 @@ if (mainJackpotHit) {
 
 ### Design Principles
 
-- **Immutability**: No upgrade mechanism
+- **Configurable Until Finalized**: Owner can adjust parameters until `finalize()` is called
 - **Reentrancy Protection**: All state-changing functions protected
 - **Integer Overflow**: Solidity 0.8+ (built-in checks)
 - **Access Control**: Only owner can admin functions
-- **Randomness**: Verifiable via Fetch Oracle
+- **Randomness**: On-chain via blockhash + timestamp + sender + playCount
+
+### Configurable Parameters (Before Finalization)
+
+While `finalized == false`, owner CAN change:
+- DAO Treasury address
+- Dev Wallet address
+- Main/Mini jackpot odds
+- Prize multipliers
+
+Once `finalize()` is called, these become permanently locked.
 
 ### Immutable Parameters
 
-Once deployed, these CANNOT be changed:
+These CANNOT be changed even before finalization:
 - Entry price (10 PLS369)
-- Split percentages (50/15/25/10)
-- Jackpot payout splits
-- Prize multipliers
-- DAO Treasury address
-- Dev Wallet address
+- Token address (PLS369)
 
 ### Admin Functions
 
-Owner can:
+Owner can (before finalization):
 - Seed jackpots (from contract balance)
-- Top up randomness
-- Update oracle address (if oracle migrates)
+- Update DAO/dev addresses
+- Adjust odds and multipliers
+- Emergency withdraw (for recovery)
 - Transfer ownership
+- Call `finalize()` to lock all settings
 
-Owner CANNOT:
-- Change game rules
-- Change payout percentages
+Owner can (after finalization):
+- Seed jackpots (from contract balance)
+
+Owner CANNOT (after finalization):
+- Change any addresses, odds, or multipliers
 - Withdraw player funds
-- Modify token balances
+- Transfer ownership
 
 ---
 
@@ -417,19 +420,16 @@ npx hardhat test
 A: Tokenization allows the DAO to build liquidity, control distribution, and create a sustainable ecosystem around the game.
 
 **Q: Can the DAO change the game rules?**
-A: No. The game is eternal and immutable. Rules are fixed at deployment.
+A: Only before `finalize()` is called. After finalization, all parameters are permanently locked.
 
-**Q: What happens if Fetch Oracle goes down?**
-A: Owner can update to a new oracle address. Existing randomness pool continues working.
-
-**Q: How often does randomness need to be topped up?**
-A: Depends on play volume. Monitor the pool and top up before it's depleted. Recommended: maintain 100+ plays worth.
+**Q: How does the randomness work?**
+A: The contract uses on-chain data (blockhash, timestamp, sender address, play count) to generate randomness. No external oracle is required.
 
 **Q: Can jackpots be seeded after launch?**
 A: Yes. Owner can seed jackpots at any time from the contract's PLS369 balance.
 
 **Q: What's to prevent the owner from draining funds?**
-A: Owner can only seed jackpots (which become player funds) or emergency withdraw. All player funds are protected by game logic.
+A: Before finalization, owner can emergency withdraw. After finalization, emergency withdraw is disabled and owner can only seed jackpots.
 
 ---
 
@@ -452,4 +452,4 @@ MIT
 
 ---
 
-**Built for the PLS369 DAO ecosystem - Eternal, immutable, and decentralized.**
+**Built for the PLS369 DAO ecosystem.**
