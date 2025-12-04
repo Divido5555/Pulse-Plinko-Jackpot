@@ -150,7 +150,10 @@ const PlinkoGame369 = () => {
     }));
 
     // Call smart contract play function
+    // This waits for blockchain confirmation before proceeding
+    console.log('⏳ Waiting for blockchain transaction to complete...');
     const result = await playGame();
+    console.log('✅ Blockchain confirmed, result:', result);
     
     if (!result) {
       // Transaction failed or was rejected
@@ -162,11 +165,13 @@ const PlinkoGame369 = () => {
       return;
     }
 
-    // Game result received from blockchain
+    // Game result received and CONFIRMED by blockchain
+    // NOW start the animation with the confirmed slot
+    console.log('🎲 Starting animation for slot:', result.slot);
     setFinalSlot(result.slot);
     setIsBallFalling(true);
     
-    // Store result for later processing
+    // Store result for later processing when ball lands
     window._lastGameResult = result;
   };
 
