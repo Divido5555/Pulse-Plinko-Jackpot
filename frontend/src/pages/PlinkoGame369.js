@@ -379,6 +379,24 @@ const PlinkoGame369 = () => {
                   <span>Total Winnings</span>
                   <span className="stat-value purple">{sessionStats.totalWinnings.toFixed(2)}</span>
                 </div>
+                {sessionStats.gamesPlayed > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSessionStats({
+                        gamesPlayed: 0,
+                        wins: 0,
+                        totalSpent: 0,
+                        totalWinnings: 0,
+                      });
+                      toast.info('Session stats reset');
+                    }}
+                    style={{ marginTop: '12px', width: '100%' }}
+                  >
+                    Reset Session Stats
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
