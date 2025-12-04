@@ -159,7 +159,13 @@ const PlinkoBoard369 = ({
   const handlePuckDragEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    startPuckAnimation();
+    
+    // Call the blockchain play function instead of starting animation directly
+    // The parent component will start animation after blockchain confirms
+    if (onLaunch) {
+      console.log('🎯 Puck released - calling onLaunch (blockchain transaction)');
+      onLaunch();
+    }
   };
 
   const checkBlockerCollision = (x, y, vx, vy) => {
