@@ -162,24 +162,21 @@ const PlinkoGame369 = () => {
       return;
     }
 
-    // Set transacting state to lock UI
-    setIsTransacting(true);
-
     try {
       // If playing multiple games, start auto-play
       if (autoPlayCount > 1) {
         toast.info(`Starting auto-play`, {
           description: `Playing ${autoPlayCount} games automatically`,
         });
-        setIsTransacting(false);
         await playMultipleGames(autoPlayCount);
       } else {
-        // Single game - original flow
+        // Single game
+        setIsTransacting(true);
         toast.info('Transaction sent', {
           description: 'Waiting for blockchain confirmation...',
           duration: 5000,
         });
-        await playOneGame();
+        await playSingleGameAndWait();
         setIsTransacting(false);
       }
     } catch (error) {
