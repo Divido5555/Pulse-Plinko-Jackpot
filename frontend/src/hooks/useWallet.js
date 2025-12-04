@@ -201,35 +201,49 @@ export const useWallet = () => {
 
   // Check allowance and approve if needed
   const ensureApproval = useCallback(async () => {
+    console.log('🔐 ensureApproval called');
+    console.log('tokenContract:', tokenContract);
+    console.log('account:', account);
+    
     if (!tokenContract || !account) {
+      console.error('❌ Missing tokenContract or account');
       throw new Error('Wallet not connected');
     }
 
     try {
       // Check current allowance
+      console.log('📊 Checking allowance...');
       const allowance = await tokenContract.allowance(account, CONTRACTS.PLINKO_GAME);
       const entryPriceWei = parseUnits(ENTRY_PRICE_TOKENS.toString(), 18);
+      console.log('Current allowance:', allowance.toString());
+      console.log('Required allowance:', entryPriceWei.toString());
 
       // If allowance is sufficient, return true
       if (allowance >= entryPriceWei) {
+        console.log('✅ Sufficient allowance exists');
         return true;
       }
 
       // Request approval
+      console.log('📝 Requesting approval...');
       toast.info('Approval needed', {
         description: 'Please approve the contract to spend your PLS369 tokens',
       });
 
+      console.log('Calling tokenContract.approve()...');
       const approveTx = await tokenContract.approve(
         CONTRACTS.PLINKO_GAME,
         parseUnits('1000000', 18) // Approve a large amount for multiple plays
       );
+      console.log('✅ Approval transaction submitted:', approveTx.hash);
 
       toast.info('Approving...', {
         description: 'Transaction submitted, waiting for confirmation',
       });
 
+      console.log('⏳ Waiting for approval confirmation...');
       await approveTx.wait();
+      console.log('✅ Approval confirmed');
 
       toast.success('Approved!', {
         description: 'You can now play the game',
@@ -237,7 +251,13 @@ export const useWallet = () => {
 
       return true;
     } catch (error) {
-      console.error('Error approving tokens:', error);
+      console.error('❌ Error approving tokens:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        data: error.data,
+        reason: error.reason,
+      });
       toast.error('Approval failed', {
         description: error.message || 'Please try again',
       });
