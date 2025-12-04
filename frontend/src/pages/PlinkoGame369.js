@@ -290,8 +290,20 @@ const PlinkoGame369 = () => {
       
       // Clear stored result
       delete window._lastGameResult;
+      
+      // Signal that animation is complete (for auto-play)
+      if (animationCompleteRef.current) {
+        console.log('📢 Signaling animation complete to auto-play');
+        animationCompleteRef.current();
+        animationCompleteRef.current = null;
+      }
     } catch (error) {
       console.error('Error handling ball landed:', error);
+      // Still signal complete even on error
+      if (animationCompleteRef.current) {
+        animationCompleteRef.current();
+        animationCompleteRef.current = null;
+      }
     }
   };
 
