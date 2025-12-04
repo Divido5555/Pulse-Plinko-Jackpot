@@ -299,61 +299,57 @@ const PlinkoGame369 = () => {
     }
   };
 
+  // Reference to track when animation completes
+  const animationCompleteRef = React.useRef(null);
+
   // Auto-play multiple games
   const playMultipleGames = async (numberOfGames) => {
     setIsAutoPlaying(true);
     setCurrentAutoPlay(0);
     
     for (let i = 0; i < numberOfGames; i++) {
-      if (!isAutoPlaying) break; // Allow cancellation
+      // Check if user cancelled
+      if (!isAutoPlaying && i > 0) {
+        console.log('🛑 Auto-play cancelled by user');
+        break;
+      }
       
       setCurrentAutoPlay(i + 1);
       console.log(`🎮 Auto-play: Game ${i + 1} of ${numberOfGames}`);
       
-      await playOneGame();
+      // Wait for this game to complete
+      const success = await playSingleGameAndWait();
       
-      // Wait a bit between games for UX
+      if (!success) {
+        console.log('❌ Game failed, stopping auto-play');
+        break;
+      }
+      
+      // Wait 3 seconds between games for UX (user can see result)
       if (i < numberOfGames - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log('⏳ Waiting 3 seconds before next game...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
     }
     
     setIsAutoPlaying(false);
     setCurrentAutoPlay(0);
     toast.success('Auto-play complete!', {
-      description: `Played ${numberOfGames} games`,
+      description: `Played ${currentAutoPlay} game(s)`,
     });
   };
 
-  // Play a single game (extracted from handleLaunch)
-  const playOneGame = async () => {
+  // Play a single game and wait for animation to complete
+  const playSingleGameAndWait = async () => {
     // Clear any existing banner
     setBanner(null);
     
-    // Check wallet connection
-    if (!isConnected) {
-      toast.error('Wallet not connected', {
-        description: 'Please connect your wallet to play',
-      });
-      return false;
-    }
-
-    // Check network
-    if (!isCorrectNetwork) {
-      toast.warning('Wrong network', {
-        description: 'Please switch to PulseChain network',
-      });
-      await switchToPulseChain();
-      return false;
-    }
-
     // Check balance
     const balanceNum = parseFloat(balance);
     if (balanceNum < ENTRY_PRICE_TOKENS) {
       toast.error('Insufficient balance', {
         description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
       });
-      setIsAutoPlaying(false);
       return false;
     }
 
@@ -365,50 +361,42 @@ const PlinkoGame369 = () => {
       }));
 
       // Call smart contract play function
-      console.log('⏳ Waiting for blockchain transaction to complete (may take up to 10 seconds)...');
+      console.log('⏳ Sending transaction to blockchain...');
       
       const result = await playGame();
       console.log('✅ Blockchain confirmed, result:', result);
       
       if (!result) {
-        // Transaction failed or was rejected
+        // Transaction failed
         setSessionStats(prev => ({
           ...prev,
           totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
         }));
-        setIsAutoPlaying(false);
         return false;
       }
 
-      // Game result received and CONFIRMED by blockchain
+      // Game result received - start animation
       console.log('🎲 Starting animation for slot:', result.slot);
       
       setFinalSlot(result.slot);
-      setIsBallFalling(true);
       
-      // Store result for later processing when ball lands
-      window._lastGameResult = result;
-      
-      // Wait for animation to complete
-      await new Promise(resolve => {
-        const checkAnimation = setInterval(() => {
-          if (!isBallFalling) {
-            clearInterval(checkAnimation);
-            resolve();
-          }
-        }, 100);
-        
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          clearInterval(checkAnimation);
-          resolve();
-        }, 5000);
+      // Create promise to wait for animation complete
+      const animationPromise = new Promise((resolve) => {
+        animationCompleteRef.current = resolve;
       });
       
+      setIsBallFalling(true);
+      
+      // Store result for handleBallLanded
+      window._lastGameResult = result;
+      
+      // Wait for animation to complete (resolved in handleBallLanded)
+      await animationPromise;
+      
+      console.log('✅ Game complete');
       return true;
     } catch (error) {
-      console.error('Error in playOneGame:', error);
-      setIsAutoPlaying(false);
+      console.error('Error in playSingleGameAndWait:', error);
       return false;
     }
   };
