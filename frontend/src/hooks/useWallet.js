@@ -17,6 +17,21 @@ const PULSECHAIN_CHAIN_ID_HEX = '0x171';
  * Supports any EIP-1193 compatible wallet (MetaMask, Safe, Rainbow, Coinbase Wallet, etc.)
  */
 export const useWallet = () => {
+  // Log environment information on mount
+  React.useEffect(() => {
+    console.log('🌍 Environment Information:');
+    console.log('- Origin:', window.location.origin);
+    console.log('- Hostname:', window.location.hostname);
+    console.log('- Protocol:', window.location.protocol);
+    console.log('- REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+    console.log('- window.ethereum available:', !!window.ethereum);
+    console.log('- MetaMask provider:', window.ethereum?.isMetaMask);
+    console.log('- Contract addresses:', {
+      token: CONTRACTS.PLS369_TOKEN,
+      game: CONTRACTS.PLINKO_GAME,
+    });
+  }, []);
+
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
