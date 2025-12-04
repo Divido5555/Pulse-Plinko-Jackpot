@@ -10,6 +10,7 @@ const PlinkoBoard369 = ({
   onLaunch,
   onBallLanded,
   miniAmountPLS,
+  mainAmountPLS,
   finalSlot,
   onJackpotIndicesChange,
 }) => {
