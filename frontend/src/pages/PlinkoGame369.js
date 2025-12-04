@@ -20,16 +20,29 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const PlinkoGame369 = () => {
+  // Wallet integration
+  const {
+    account,
+    balance,
+    isConnected,
+    isConnecting,
+    isCorrectNetwork,
+    connectWallet,
+    disconnectWallet,
+    switchToPulseChain,
+    playGame,
+    fetchGameState: fetchBlockchainGameState,
+    fetchBalance,
+  } = useWallet();
+
   const [gameState, setGameState] = useState(null);
   const [isBallFalling, setIsBallFalling] = useState(false);
   const [finalSlot, setFinalSlot] = useState(null);
   const [banner, setBanner] = useState(null);
-  const [connectedAddress, setConnectedAddress] = useState(null);
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   
-  // Player wallet & session state
-  const [playerBalance, setPlayerBalance] = useState(100000); // Start with 100,000 PLS for testing
+  // Session stats (local tracking)
   const [sessionStats, setSessionStats] = useState({
     gamesPlayed: 0,
     wins: 0,
@@ -37,10 +50,10 @@ const PlinkoGame369 = () => {
     totalWinnings: 0,
   });
   
-  // Local jackpot tracking (grows with each play)
-  const [localJackpots, setLocalJackpots] = useState({
-    main: 52341.50,
-    mini: 8762.30,
+  // Blockchain jackpot values
+  const [jackpots, setJackpots] = useState({
+    main: '0',
+    mini: '0',
   });
   
   // Track jackpot slot indices
