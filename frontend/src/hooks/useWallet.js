@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserProvider, Contract, formatUnits, parseUnits } from 'ethers';
 import { toast } from 'sonner';
 import {
