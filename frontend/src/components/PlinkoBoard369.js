@@ -377,7 +377,7 @@ const PlinkoBoard369 = ({
         </div>
       </div>
 
-      {/* 24 Slots at Bottom */}
+      {/* 20 Slots at Bottom */}
       <div className="slots-row-24">
         {SLOTS.map((s) => (
           <div
