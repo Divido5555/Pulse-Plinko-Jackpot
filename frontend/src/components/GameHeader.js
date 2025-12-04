@@ -8,11 +8,11 @@ const GameHeader = ({ miniAmountPLS, mainAmountPLS }) => {
         <div className="jackpot-tickers">
           <div className="ticker mini-ticker">
             <span className="tag">MINI JACKPOT</span>
-            <span className="value">{miniAmountPLS} PLS</span>
+            <span className="value">{miniAmountPLS} PLS369</span>
           </div>
           <div className="ticker main-ticker">
             <span className="tag">MAIN JACKPOT</span>
-            <span className="value">{mainAmountPLS} PLS</span>
+            <span className="value">{mainAmountPLS} PLS369</span>
           </div>
         </div>
       </div>
