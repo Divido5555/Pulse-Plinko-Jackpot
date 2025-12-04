@@ -404,6 +404,7 @@ export const useWallet = () => {
     };
 
     checkConnection();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWalletInstalled]);
 
   return {
