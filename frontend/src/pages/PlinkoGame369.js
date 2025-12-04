@@ -371,61 +371,7 @@ const PlinkoGame369 = () => {
         <div className="game-layout">
           {/* Main Game Board */}
           <div className="board-column">
-            {/* Auto-Play Controls */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '16px',
-              padding: '12px',
-              background: 'rgba(0, 217, 255, 0.1)',
-              borderRadius: '8px',
-              border: '1px solid rgba(0, 217, 255, 0.3)',
-            }}>
-              <label style={{ color: '#00d9ff', fontWeight: 'bold', fontSize: '14px' }}>
-                Games to Play:
-              </label>
-              <select
-                value={autoPlayCount}
-                onChange={(e) => setAutoPlayCount(parseInt(e.target.value))}
-                disabled={isTransacting || isAutoPlaying}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #00d9ff',
-                  background: 'rgba(0, 0, 0, 0.5)',
-                  color: '#00d9ff',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value={1}>1 Game (10 PLS369)</option>
-                <option value={5}>5 Games (50 PLS369)</option>
-                <option value={10}>10 Games (100 PLS369)</option>
-                <option value={20}>20 Games (200 PLS369)</option>
-                <option value={50}>50 Games (500 PLS369)</option>
-              </select>
-              {isAutoPlaying && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#00d9ff', fontSize: '14px' }}>
-                    Game {currentAutoPlay} of {autoPlayCount}
-                  </span>
-                  <Button
-                    onClick={() => {
-                      window._autoPlayActive = false;
-                      setIsAutoPlaying(false);
-                      toast.info('Cancelling after current game...');
-                    }}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </div>
+            {/* Single game play - 10 PLS369 per game */}
             <PlinkoBoard369
               isBallFalling={isBallFalling}
               onLaunch={handleLaunch}
