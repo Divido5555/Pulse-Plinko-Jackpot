@@ -288,9 +288,9 @@ const PlinkoBoard369 = ({
       
       // Check if reached bottom (90% down)
       if (currentY >= 90) {
-        // Map X position to slot (24 slots)
-        const slotIndex = Math.round((currentX / 100) * 23);
-        const finalSlot = Math.max(0, Math.min(23, slotIndex));
+        // Map X position to slot (20 slots)
+        const slotIndex = Math.round((currentX / 100) * 19);
+        const finalSlot = Math.max(0, Math.min(19, slotIndex));
         
         setLandedSlot(finalSlot);
         setTimeout(() => {
