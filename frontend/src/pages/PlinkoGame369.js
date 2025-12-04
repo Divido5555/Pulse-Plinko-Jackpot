@@ -69,20 +69,22 @@ const PlinkoGame369 = () => {
     }
   };
 
-  // Fetch blockchain game state on mount and when connected
+  // Fetch blockchain game state on mount and periodically
   useEffect(() => {
     const loadGameState = async () => {
-      if (isConnected) {
-        const state = await fetchBlockchainGameState();
-        if (state) {
-          setJackpots({
-            main: state.mainJackpot,
-            mini: state.miniJackpot,
-          });
-        }
+      // Try to fetch game state whether connected or not
+      // This allows viewing jackpots without connecting wallet
+      const state = await fetchBlockchainGameState();
+      if (state) {
+        setJackpots({
+          main: state.mainJackpot,
+          mini: state.miniJackpot,
+        });
+        console.log('Jackpots updated:', state);
       }
     };
 
+    // Initial load
     loadGameState();
     fetchStats();
 
@@ -93,7 +95,7 @@ const PlinkoGame369 = () => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isConnected, fetchBlockchainGameState]);
+  }, [fetchBlockchainGameState]);
 
   const handleLaunch = async () => {
     // Clear any existing banner immediately
