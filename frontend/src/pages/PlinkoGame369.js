@@ -124,6 +124,14 @@ const PlinkoGame369 = () => {
   }, [fetchBlockchainGameState]);
 
   const handleLaunch = async () => {
+    // Prevent multiple simultaneous transactions
+    if (isTransacting) {
+      toast.warning('Transaction in progress', {
+        description: 'Please wait for current transaction to complete',
+      });
+      return;
+    }
+
     // Clear any existing banner immediately
     setBanner(null);
     
@@ -153,36 +161,60 @@ const PlinkoGame369 = () => {
       return;
     }
 
-    // Update session stats (optimistically)
-    setSessionStats(prev => ({
-      ...prev,
-      totalSpent: prev.totalSpent + ENTRY_PRICE_TOKENS,
-    }));
+    // Set transacting state to lock UI
+    setIsTransacting(true);
 
-    // Call smart contract play function
-    // This waits for blockchain confirmation before proceeding
-    console.log('⏳ Waiting for blockchain transaction to complete...');
-    const result = await playGame();
-    console.log('✅ Blockchain confirmed, result:', result);
-    
-    if (!result) {
-      // Transaction failed or was rejected
-      // Revert optimistic update
+    try {
+      // Update session stats (optimistically)
       setSessionStats(prev => ({
         ...prev,
-        totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
+        totalSpent: prev.totalSpent + ENTRY_PRICE_TOKENS,
       }));
-      return;
-    }
 
-    // Game result received and CONFIRMED by blockchain
-    // NOW start the animation with the confirmed slot
-    console.log('🎲 Starting animation for slot:', result.slot);
-    setFinalSlot(result.slot);
-    setIsBallFalling(true);
-    
-    // Store result for later processing when ball lands
-    window._lastGameResult = result;
+      // Call smart contract play function
+      // This waits for blockchain confirmation before proceeding (up to 10+ seconds)
+      console.log('⏳ Waiting for blockchain transaction to complete (may take up to 10 seconds)...');
+      toast.info('Transaction sent', {
+        description: 'Waiting for blockchain confirmation...',
+        duration: 5000,
+      });
+      
+      const result = await playGame();
+      console.log('✅ Blockchain confirmed, result:', result);
+      
+      if (!result) {
+        // Transaction failed or was rejected
+        // Revert optimistic update
+        setSessionStats(prev => ({
+          ...prev,
+          totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
+        }));
+        setIsTransacting(false);
+        return;
+      }
+
+      // Game result received and CONFIRMED by blockchain
+      // NOW start the animation with the confirmed slot
+      console.log('🎲 Starting animation for slot:', result.slot);
+      toast.success('Transaction confirmed!', {
+        description: `Puck will land in slot ${result.slot}`,
+      });
+      
+      setFinalSlot(result.slot);
+      setIsBallFalling(true);
+      
+      // Store result for later processing when ball lands
+      window._lastGameResult = result;
+      
+      // Unlock UI after animation starts
+      setIsTransacting(false);
+    } catch (error) {
+      console.error('Error in handleLaunch:', error);
+      setIsTransacting(false);
+      toast.error('Transaction failed', {
+        description: error.message || 'Please try again',
+      });
+    }
   };
 
   const handleBallLanded = async (landedSlot) => {
