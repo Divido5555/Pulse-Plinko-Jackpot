@@ -501,6 +501,15 @@ export const useWallet = () => {
     checkConnection();
   }, [isWalletInstalled, connectWallet]);
 
+  // Wrapper function to fetch balance with current state
+  const refreshBalance = useCallback(async () => {
+    console.log('🔄 refreshBalance called with:', { account, tokenContract: !!tokenContract });
+    if (account && tokenContract) {
+      return await fetchBalance(account, tokenContract);
+    }
+    return '0';
+  }, [account, tokenContract, fetchBalance]);
+
   return {
     account,
     balance,
@@ -513,6 +522,6 @@ export const useWallet = () => {
     switchToPulseChain,
     playGame,
     fetchGameState,
-    fetchBalance: () => fetchBalance(account, tokenContract),
+    fetchBalance: refreshBalance,
   };
 };
