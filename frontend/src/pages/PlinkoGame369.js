@@ -218,6 +218,11 @@ const PlinkoGame369 = () => {
   };
 
   const handleBallLanded = async (landedSlot) => {
+    console.log('🎯 handleBallLanded called for slot:', landedSlot);
+    
+    // Reset ball falling state
+    setIsBallFalling(false);
+    
     // Clear banner first
     setBanner(null);
     
@@ -226,15 +231,17 @@ const PlinkoGame369 = () => {
       const result = window._lastGameResult;
       
       if (!result) {
-        console.error('No game result found');
+        console.error('❌ No game result found in window._lastGameResult');
         return;
       }
 
+      console.log('✅ Processing result:', result);
       const { payout, mainJackpotHit, miniJackpotHit } = result;
       const payoutFormatted = formatUnits(payout, 18);
       const payoutNum = parseFloat(payoutFormatted);
       
       const isWin = payoutNum > 0;
+      console.log(`Win: ${isWin}, Payout: ${payoutNum} PLS369`);
 
       // Update session stats
       setSessionStats(prev => ({
