@@ -362,11 +362,14 @@ const PlinkoGame369 = () => {
 
   // Play a single game and wait for animation to complete
   const playSingleGameAndWait = async () => {
+    console.log('🎯 playSingleGameAndWait started');
+    
     // Clear any existing banner
     setBanner(null);
     
     // Check balance
     const balanceNum = parseFloat(balance);
+    console.log('💰 Balance check:', balanceNum, 'needed:', ENTRY_PRICE_TOKENS);
     if (balanceNum < ENTRY_PRICE_TOKENS) {
       toast.error('Insufficient balance', {
         description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
@@ -388,6 +391,7 @@ const PlinkoGame369 = () => {
       console.log('✅ Blockchain confirmed, result:', result);
       
       if (!result) {
+        console.log('❌ playGame returned null/false');
         // Transaction failed
         setSessionStats(prev => ({
           ...prev,
@@ -397,27 +401,32 @@ const PlinkoGame369 = () => {
       }
 
       // Game result received - start animation
-      console.log('🎲 Starting animation for slot:', result.slot);
+      console.log('🎲 Setting up animation for slot:', result.slot);
       
       setFinalSlot(result.slot);
       
       // Create promise to wait for animation complete
+      console.log('⏳ Creating animation promise...');
       const animationPromise = new Promise((resolve) => {
         animationCompleteRef.current = resolve;
+        console.log('✅ Animation promise created, waiting for signal...');
       });
       
       setIsBallFalling(true);
+      console.log('✅ setIsBallFalling(true) called');
       
       // Store result for handleBallLanded
       window._lastGameResult = result;
       
       // Wait for animation to complete (resolved in handleBallLanded)
+      console.log('⏳ Awaiting animation completion...');
       await animationPromise;
       
-      console.log('✅ Game complete');
+      console.log('✅ Game complete, animation finished');
       return true;
     } catch (error) {
-      console.error('Error in playSingleGameAndWait:', error);
+      console.error('❌ Error in playSingleGameAndWait:', error);
+      console.error('Error stack:', error.stack);
       return false;
     }
   };
