@@ -128,16 +128,13 @@ const PlinkoGame369 = () => {
 
   const handleLaunch = async () => {
     // Prevent multiple simultaneous transactions
-    if (isTransacting) {
+    if (isTransacting || isAutoPlaying) {
       toast.warning('Transaction in progress', {
         description: 'Please wait for current transaction to complete',
       });
       return;
     }
 
-    // Clear any existing banner immediately
-    setBanner(null);
-    
     // Check wallet connection
     if (!isConnected) {
       toast.error('Wallet not connected', {
@@ -155,11 +152,12 @@ const PlinkoGame369 = () => {
       return;
     }
 
-    // Check balance
+    // Check balance for all games
     const balanceNum = parseFloat(balance);
-    if (balanceNum < ENTRY_PRICE_TOKENS) {
+    const totalNeeded = ENTRY_PRICE_TOKENS * autoPlayCount;
+    if (balanceNum < totalNeeded) {
       toast.error('Insufficient balance', {
-        description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
+        description: `You need ${totalNeeded} PLS369 to play ${autoPlayCount} game(s)`,
       });
       return;
     }
@@ -168,52 +166,26 @@ const PlinkoGame369 = () => {
     setIsTransacting(true);
 
     try {
-      // Update session stats (optimistically)
-      setSessionStats(prev => ({
-        ...prev,
-        totalSpent: prev.totalSpent + ENTRY_PRICE_TOKENS,
-      }));
-
-      // Call smart contract play function
-      // This waits for blockchain confirmation before proceeding (up to 10+ seconds)
-      console.log('⏳ Waiting for blockchain transaction to complete (may take up to 10 seconds)...');
-      toast.info('Transaction sent', {
-        description: 'Waiting for blockchain confirmation...',
-        duration: 5000,
-      });
-      
-      const result = await playGame();
-      console.log('✅ Blockchain confirmed, result:', result);
-      
-      if (!result) {
-        // Transaction failed or was rejected
-        // Revert optimistic update
-        setSessionStats(prev => ({
-          ...prev,
-          totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
-        }));
+      // If playing multiple games, start auto-play
+      if (autoPlayCount > 1) {
+        toast.info(`Starting auto-play`, {
+          description: `Playing ${autoPlayCount} games automatically`,
+        });
         setIsTransacting(false);
-        return;
+        await playMultipleGames(autoPlayCount);
+      } else {
+        // Single game - original flow
+        toast.info('Transaction sent', {
+          description: 'Waiting for blockchain confirmation...',
+          duration: 5000,
+        });
+        await playOneGame();
+        setIsTransacting(false);
       }
-
-      // Game result received and CONFIRMED by blockchain
-      // NOW start the animation with the confirmed slot
-      console.log('🎲 Starting animation for slot:', result.slot);
-      toast.success('Transaction confirmed!', {
-        description: `Puck will land in slot ${result.slot}`,
-      });
-      
-      setFinalSlot(result.slot);
-      setIsBallFalling(true);
-      
-      // Store result for later processing when ball lands
-      window._lastGameResult = result;
-      
-      // Unlock UI after animation starts
-      setIsTransacting(false);
     } catch (error) {
       console.error('Error in handleLaunch:', error);
       setIsTransacting(false);
+      setIsAutoPlaying(false);
       toast.error('Transaction failed', {
         description: error.message || 'Please try again',
       });
