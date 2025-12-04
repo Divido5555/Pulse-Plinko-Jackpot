@@ -168,10 +168,12 @@ const PlinkoGame369 = () => {
     try {
       // If playing multiple games, start auto-play
       if (autoPlayCount > 1) {
+        window._autoPlayActive = true;
         toast.info(`Starting auto-play`, {
           description: `Playing ${autoPlayCount} games automatically`,
         });
         await playMultipleGames(autoPlayCount);
+        delete window._autoPlayActive;
       } else {
         // Single game
         setIsTransacting(true);
