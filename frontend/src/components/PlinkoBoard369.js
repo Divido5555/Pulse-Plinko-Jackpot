@@ -12,6 +12,7 @@ const PlinkoBoard369 = ({
   miniAmountPLS,
   mainAmountPLS,
   finalSlot,
+  isTransacting = false,
   onJackpotIndicesChange,
 }) => {
   const [miniIndex, setMiniIndex] = useState(
