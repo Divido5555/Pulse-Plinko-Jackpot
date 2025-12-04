@@ -316,9 +316,6 @@ const PlinkoGame369 = () => {
     }
   };
 
-  // Reference to track when animation completes
-  const animationCompleteRef = React.useRef(null);
-
   // Auto-play multiple games
   const playMultipleGames = async (numberOfGames) => {
     setIsAutoPlaying(true);
