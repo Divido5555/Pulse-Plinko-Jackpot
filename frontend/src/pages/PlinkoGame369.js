@@ -41,6 +41,7 @@ const PlinkoGame369 = () => {
   const [banner, setBanner] = useState(null);
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [isTransacting, setIsTransacting] = useState(false);
   
   // Session stats (local tracking with localStorage persistence)
   const [sessionStats, setSessionStats] = useState(() => {
