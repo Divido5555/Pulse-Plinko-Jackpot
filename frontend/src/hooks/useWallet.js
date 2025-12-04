@@ -328,19 +328,42 @@ export const useWallet = () => {
   }, [gameContract, account, ensureApproval, balance, fetchBalance, tokenContract]);
 
   // Fetch game state (jackpots, play count, etc.)
+  // This can work without wallet connection using a read-only provider
   const fetchGameState = useCallback(async () => {
-    if (!gameContract) return null;
-
     try {
-      const state = await gameContract.getGameState();
-      return {
-        mainJackpot: formatUnits(state._mainJackpot, 18),
-        miniJackpot: formatUnits(state._miniJackpot, 18),
-        playCount: Number(state._playCount),
-        daoAccrued: formatUnits(state._daoAccrued, 18),
-        devAccrued: formatUnits(state._devAccrued, 18),
-        entryPrice: formatUnits(state._entryPrice, 18),
-      };
+      // If we have a connected contract, use it
+      if (gameContract) {
+        const state = await gameContract.getGameState();
+        return {
+          mainJackpot: formatUnits(state._mainJackpot, 18),
+          miniJackpot: formatUnits(state._miniJackpot, 18),
+          playCount: Number(state._playCount),
+          daoAccrued: formatUnits(state._daoAccrued, 18),
+          devAccrued: formatUnits(state._devAccrued, 18),
+          entryPrice: formatUnits(state._entryPrice, 18),
+        };
+      }
+      
+      // Otherwise, create a read-only provider to fetch public data
+      if (typeof window.ethereum !== 'undefined') {
+        const readProvider = new BrowserProvider(window.ethereum);
+        const readGameContract = new Contract(
+          CONTRACTS.PLINKO_GAME,
+          PLINKO_GAME_ABI,
+          readProvider
+        );
+        const state = await readGameContract.getGameState();
+        return {
+          mainJackpot: formatUnits(state._mainJackpot, 18),
+          miniJackpot: formatUnits(state._miniJackpot, 18),
+          playCount: Number(state._playCount),
+          daoAccrued: formatUnits(state._daoAccrued, 18),
+          devAccrued: formatUnits(state._devAccrued, 18),
+          entryPrice: formatUnits(state._entryPrice, 18),
+        };
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error fetching game state:', error);
       return null;
