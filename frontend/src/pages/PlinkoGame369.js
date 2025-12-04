@@ -60,25 +60,31 @@ const PlinkoGame369 = () => {
   const [miniIndex, setMiniIndex] = useState(null);
   const [mainIndex, setMainIndex] = useState(null);
 
+  // Fetch blockchain game state on mount and when connected
   useEffect(() => {
-    fetchGameState();
+    const loadGameState = async () => {
+      if (isConnected) {
+        const state = await fetchBlockchainGameState();
+        if (state) {
+          setJackpots({
+            main: state.mainJackpot,
+            mini: state.miniJackpot,
+          });
+        }
+      }
+    };
+
+    loadGameState();
     fetchStats();
+
+    // Refresh game state every 30 seconds
     const interval = setInterval(() => {
-      fetchGameState();
+      loadGameState();
       fetchStats();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
-
-  const fetchGameState = async () => {
-    try {
-      const response = await axios.get(`${API}/game/state`);
-      setGameState(response.data);
-    } catch (error) {
-      console.error('Error fetching game state:', error);
-    }
-  };
+  }, [isConnected, fetchBlockchainGameState]);
 
   const fetchStats = async () => {
     try {
