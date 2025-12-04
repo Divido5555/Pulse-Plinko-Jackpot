@@ -509,7 +509,11 @@ const PlinkoGame369 = () => {
                     Game {currentAutoPlay} of {autoPlayCount}
                   </span>
                   <Button
-                    onClick={() => setIsAutoPlaying(false)}
+                    onClick={() => {
+                      window._autoPlayActive = false;
+                      setIsAutoPlaying(false);
+                      toast.info('Cancelling after current game...');
+                    }}
                     variant="destructive"
                     size="sm"
                   >
