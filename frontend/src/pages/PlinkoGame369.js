@@ -414,27 +414,29 @@ const PlinkoGame369 = () => {
               </CardContent>
             </Card>
 
-            {stats && (
-              <Card className="stats-card">
-                <CardHeader>
-                  <CardTitle>Game Stats</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="stat-row">
-                    <span>Total Plays</span>
-                    <span className="stat-value">{stats.total_plays.toLocaleString()}</span>
-                  </div>
-                  <div className="stat-row">
-                    <span>Win Rate</span>
-                    <span className="stat-value green">{(stats.win_rate * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="stat-row">
-                    <span>Jackpot Wins</span>
-                    <span className="stat-value purple">{stats.jackpot_wins}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="stats-card">
+              <CardHeader>
+                <CardTitle>Contract Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="stat-row">
+                  <span>Total Plays</span>
+                  <span className="stat-value">{blockchainStats.playCount.toLocaleString()}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Entry Price</span>
+                  <span className="stat-value">{parseFloat(blockchainStats.entryPrice).toFixed(0)} PLS369</span>
+                </div>
+                <div className="stat-row">
+                  <span>Main Jackpot</span>
+                  <span className="stat-value purple">{parseFloat(jackpots.main).toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Mini Jackpot</span>
+                  <span className="stat-value green">{parseFloat(jackpots.mini).toFixed(2)}</span>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Admin Button */}
             <Button
