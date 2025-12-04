@@ -257,9 +257,41 @@ const PlinkoGame369 = () => {
       <Backdrop />
 
       <div className="content-wrapper">
+        {/* Wallet Connection Button */}
+        <div className="wallet-button-container" style={{ 
+          position: 'absolute', 
+          top: '20px', 
+          right: '20px', 
+          zIndex: 100 
+        }}>
+          <Button
+            onClick={handleWalletAction}
+            disabled={isConnecting}
+            variant={isConnected ? "outline" : "default"}
+            size="lg"
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            {isConnecting 
+              ? 'Connecting...' 
+              : isConnected 
+                ? `${account.slice(0, 6)}...${account.slice(-4)}` 
+                : 'Connect Wallet'}
+          </Button>
+          {isConnected && !isCorrectNetwork && (
+            <Button
+              onClick={switchToPulseChain}
+              variant="destructive"
+              size="sm"
+              style={{ marginTop: '8px', width: '100%' }}
+            >
+              Switch to PulseChain
+            </Button>
+          )}
+        </div>
+
         <GameHeader
-          miniAmountPLS={localJackpots.mini.toFixed(2)}
-          mainAmountPLS={localJackpots.main.toFixed(2)}
+          miniAmountPLS={parseFloat(jackpots.mini).toFixed(2)}
+          mainAmountPLS={parseFloat(jackpots.main).toFixed(2)}
         />
 
         <div className="game-layout">
