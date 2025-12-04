@@ -101,7 +101,11 @@ const PlinkoGame369 = () => {
           main: state.mainJackpot,
           mini: state.miniJackpot,
         });
-        console.log('Jackpots updated:', state);
+        setBlockchainStats({
+          playCount: state.playCount,
+          entryPrice: state.entryPrice,
+        });
+        console.log('Blockchain state updated:', state);
       }
     };
 
@@ -109,11 +113,11 @@ const PlinkoGame369 = () => {
     loadGameState();
     fetchStats();
 
-    // Refresh game state every 30 seconds
+    // Refresh game state every 10 seconds (faster for active games)
     const interval = setInterval(() => {
       loadGameState();
       fetchStats();
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [fetchBlockchainGameState]);
