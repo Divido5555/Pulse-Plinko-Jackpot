@@ -61,10 +61,15 @@ const PlinkoGame369 = () => {
     };
   });
   
-  // Blockchain jackpot values
+  // Blockchain jackpot values and game stats
   const [jackpots, setJackpots] = useState({
     main: '0',
     mini: '0',
+  });
+  
+  const [blockchainStats, setBlockchainStats] = useState({
+    playCount: 0,
+    entryPrice: '10',
   });
   
   // Track jackpot slot indices
