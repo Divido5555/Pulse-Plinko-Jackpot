@@ -301,7 +301,7 @@ const PlinkoGame369 = () => {
               isBallFalling={isBallFalling}
               onLaunch={handleLaunch}
               onBallLanded={handleBallLanded}
-              miniAmountPLS={localJackpots.mini.toFixed(2)}
+              miniAmountPLS={parseFloat(jackpots.mini).toFixed(2)}
               finalSlot={finalSlot}
               onJackpotIndicesChange={(mini, main) => {
                 setMiniIndex(mini);
@@ -313,9 +313,9 @@ const PlinkoGame369 = () => {
             <div className="info-card-compact">
               <div className="info-compact-title">How to Play</div>
               <div className="info-compact-content">
-                <span><strong>Entry:</strong> 10,000 PLS</span> • 
-                <span><strong>Wins:</strong> Slots 1,5,9,13,17</span> • 
-                <span><strong>Jackpots:</strong> Land on badges + pass odds</span>
+                <span><strong>Entry:</strong> 10 PLS369</span> • 
+                <span><strong>Wins:</strong> Slots 3,7,11,15,18</span> • 
+                <span><strong>Jackpots:</strong> Slots 10 (Main), 2 & 16 (Mini)</span>
               </div>
             </div>
           </div>
