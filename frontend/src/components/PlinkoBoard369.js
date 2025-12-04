@@ -411,7 +411,9 @@ const PlinkoBoard369 = ({
 
       {/* Instructions */}
       <div className="puck-instructions">
-        {!isAnimating ? (
+        {isTransacting ? (
+          <p>⏳ <strong>Waiting for blockchain...</strong> (up to 10 sec)</p>
+        ) : !isAnimating ? (
           <p><strong>Drag the puck</strong> and release to drop!</p>
         ) : (
           <p>Puck falling...</p>
