@@ -321,13 +321,9 @@ const PlinkoGame369 = () => {
     setIsAutoPlaying(true);
     setCurrentAutoPlay(0);
     
+    let gamesPlayed = 0;
+    
     for (let i = 0; i < numberOfGames; i++) {
-      // Check if user cancelled
-      if (!isAutoPlaying && i > 0) {
-        console.log('🛑 Auto-play cancelled by user');
-        break;
-      }
-      
       setCurrentAutoPlay(i + 1);
       console.log(`🎮 Auto-play: Game ${i + 1} of ${numberOfGames}`);
       
@@ -339,17 +335,26 @@ const PlinkoGame369 = () => {
         break;
       }
       
+      gamesPlayed++;
+      
       // Wait 3 seconds between games for UX (user can see result)
       if (i < numberOfGames - 1) {
         console.log('⏳ Waiting 3 seconds before next game...');
         await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+      
+      // Check if user cancelled (using a ref would be better but this works)
+      const shouldContinue = window._autoPlayActive !== false;
+      if (!shouldContinue && i < numberOfGames - 1) {
+        console.log('🛑 Auto-play cancelled by user');
+        break;
       }
     }
     
     setIsAutoPlaying(false);
     setCurrentAutoPlay(0);
     toast.success('Auto-play complete!', {
-      description: `Played ${currentAutoPlay} game(s)`,
+      description: `Played ${gamesPlayed} game(s)`,
     });
   };
 
