@@ -259,19 +259,22 @@ export const useWallet = () => {
 
       // Request approval
       console.log('📝 Requesting approval...');
+      const approvalAmount = '1000000'; // Approve large amount for gas efficiency
       toast.info('Approval needed', {
-        description: 'Please approve the contract to spend your PLS369 tokens',
+        description: `Approving ${approvalAmount} PLS369 tokens (for multiple games, saves gas!)`,
+        duration: 6000,
       });
 
-      console.log('Calling tokenContract.approve()...');
+      console.log('Calling tokenContract.approve() for:', approvalAmount);
       const approveTx = await tokenContract.approve(
         CONTRACTS.PLINKO_GAME,
-        parseUnits('1000000', 18) // Approve a large amount for multiple plays
+        parseUnits(approvalAmount, 18) // Approve a large amount for multiple plays
       );
       console.log('✅ Approval transaction submitted:', approveTx.hash);
 
       toast.info('Approving...', {
-        description: 'Transaction submitted, waiting for confirmation',
+        description: `Approving ${approvalAmount} PLS369 - This covers many games!`,
+        duration: 5000,
       });
 
       console.log('⏳ Waiting for approval confirmation...');
