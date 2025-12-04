@@ -156,15 +156,23 @@ export const useWallet = () => {
       }
 
       // Initialize provider and signer
+      console.log('🔌 Creating BrowserProvider from window.ethereum...');
       const browserProvider = new BrowserProvider(window.ethereum);
+      console.log('✅ BrowserProvider created:', browserProvider);
+      
+      console.log('🖊️ Getting signer...');
       const signerInstance = await browserProvider.getSigner();
+      console.log('✅ Signer obtained:', signerInstance);
+      console.log('Signer address:', await signerInstance.getAddress());
       
       setProvider(browserProvider);
       setSigner(signerInstance);
       setAccount(accounts[0]);
 
       // Initialize contracts
+      console.log('📄 Initializing contracts with signer...');
       const contracts = await initializeContracts(signerInstance);
+      console.log('✅ Contracts initialized:', contracts);
       
       if (contracts) {
         // Fetch initial balance
