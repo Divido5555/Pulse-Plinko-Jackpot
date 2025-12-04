@@ -247,22 +247,34 @@ export const useWallet = () => {
 
   // Play the game
   const playGame = useCallback(async () => {
+    console.log('🎮 playGame called');
+    console.log('gameContract:', gameContract);
+    console.log('account:', account);
+    console.log('balance:', balance);
+    
     if (!gameContract || !account) {
+      console.error('❌ Missing gameContract or account');
       throw new Error('Wallet not connected');
     }
 
     try {
+      console.log('✅ Starting approval check...');
       // Ensure approval first
       const approved = await ensureApproval();
+      console.log('Approval result:', approved);
+      
       if (!approved) {
+        console.log('❌ Approval failed or rejected');
         return null;
       }
 
       // Check balance
       const balanceWei = parseUnits(balance, 18);
       const entryPriceWei = parseUnits(ENTRY_PRICE_TOKENS.toString(), 18);
+      console.log('Balance check:', { balanceWei: balanceWei.toString(), entryPriceWei: entryPriceWei.toString() });
       
       if (balanceWei < entryPriceWei) {
+        console.log('❌ Insufficient balance');
         toast.error('Insufficient balance', {
           description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
         });
@@ -270,12 +282,19 @@ export const useWallet = () => {
       }
 
       // Call play function
+      console.log('🎲 Calling gameContract.play()...');
+      console.log('Game contract address:', gameContract.target || gameContract.address);
+      
       toast.info('Playing...', {
         description: 'Transaction submitted, waiting for result',
       });
 
       const playTx = await gameContract.play();
+      console.log('✅ Play transaction submitted:', playTx.hash);
+      
+      console.log('⏳ Waiting for transaction confirmation...');
       const receipt = await playTx.wait();
+      console.log('✅ Transaction confirmed:', receipt);
 
       // Parse Play event from receipt
       const playEvent = receipt.logs
