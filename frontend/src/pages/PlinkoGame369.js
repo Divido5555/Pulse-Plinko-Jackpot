@@ -260,9 +260,12 @@ const PlinkoGame369 = () => {
         {/* Wallet Connection Button */}
         <div className="wallet-button-container" style={{ 
           position: 'absolute', 
-          top: '20px', 
+          top: '90px', 
           right: '20px', 
-          zIndex: 100 
+          zIndex: 100,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
         }}>
           <Button
             onClick={handleWalletAction}
@@ -282,7 +285,6 @@ const PlinkoGame369 = () => {
               onClick={switchToPulseChain}
               variant="destructive"
               size="sm"
-              style={{ marginTop: '8px', width: '100%' }}
             >
               Switch to PulseChain
             </Button>
