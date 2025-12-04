@@ -46,6 +46,9 @@ const PlinkoGame369 = () => {
   const [currentAutoPlay, setCurrentAutoPlay] = useState(0); // Current game in auto-play
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   
+  // Reference to track when animation completes (for auto-play)
+  const animationCompleteRef = React.useRef(null);
+  
   // Session stats (local tracking with localStorage persistence)
   const [sessionStats, setSessionStats] = useState(() => {
     // Try to load from localStorage
