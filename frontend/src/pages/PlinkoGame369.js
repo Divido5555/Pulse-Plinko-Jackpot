@@ -316,7 +316,15 @@ const PlinkoGame369 = () => {
               <div className="info-compact-content">
                 <span><strong>Entry:</strong> 10 PLS369</span> • 
                 <span><strong>Wins:</strong> Slots 3,7,11,15,18</span> • 
-                <span><strong>Jackpots:</strong> Slots 10 (Main), 2 & 16 (Mini)</span>
+                <span><strong>Jackpots:</strong> Slots 10 (Main), 2 & 16 (Mini)</span> • 
+                <a 
+                  href="https://web.telegram.org/k/#@pulse369dao" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: '#00d9ff', textDecoration: 'none', fontWeight: 'bold' }}
+                >
+                  Whitepaper
+                </a>
               </div>
             </div>
           </div>
