@@ -322,13 +322,36 @@ const PlinkoGame369 = () => {
 
           {/* Stats Sidebar */}
           <div className="stats-column">
-            {/* Player Wallet */}
-            <PlayerWallet
-              balance={playerBalance}
-              onDeposit={handleDeposit}
-              onWithdraw={handleWithdraw}
-              sessionStats={sessionStats}
-            />
+            {/* Player Balance Card */}
+            <Card className="stats-card">
+              <CardHeader>
+                <CardTitle>Your Balance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="stat-row">
+                  <span>PLS369 Balance</span>
+                  <span className="stat-value green">
+                    {isConnected ? parseFloat(balance).toFixed(2) : '0.00'}
+                  </span>
+                </div>
+                <div className="stat-row">
+                  <span>Games Played</span>
+                  <span className="stat-value">{sessionStats.gamesPlayed}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Total Wins</span>
+                  <span className="stat-value green">{sessionStats.wins}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Total Spent</span>
+                  <span className="stat-value">{sessionStats.totalSpent.toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Total Winnings</span>
+                  <span className="stat-value purple">{sessionStats.totalWinnings.toFixed(2)}</span>
+                </div>
+              </CardContent>
+            </Card>
 
             {stats && (
               <Card className="stats-card">
