@@ -103,6 +103,14 @@ const PlinkoBoard369 = ({
     setBlockerPositions(blockers);
   }, []);
 
+  // Start animation when parent sets isBallFalling to true (after blockchain confirmation)
+  useEffect(() => {
+    if (isBallFalling && !isAnimating && finalSlot !== null) {
+      console.log('🎲 isBallFalling triggered - starting animation to slot:', finalSlot);
+      startPuckAnimation();
+    }
+  }, [isBallFalling, isAnimating, finalSlot]);
+
   // Shuffle badges
   useEffect(() => {
     if (!isBallFalling && !isAnimating) {
