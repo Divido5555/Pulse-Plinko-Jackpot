@@ -157,85 +157,49 @@ const PlinkoGame369 = () => {
     setBanner(null);
     
     try {
-      // Determine outcome
-      const prizeSlots = { 1: 1.1, 6: 1.5, 11: 2.0, 15: 3.0, 19: 5.0 };
-      const payout = prizeSlots[landedSlot] || 0;
+      // Get the result from blockchain (stored in window during handleLaunch)
+      const result = window._lastGameResult;
       
-      // Check if ball landed on jackpot slots AND passes probability check
-      const landedOnMini = landedSlot === miniIndex;
-      const landedOnMain = landedSlot === mainIndex;
-      
-      // Actual jackpot odds (very rare)
-      const miniHit = landedOnMini && (Math.random() < (1 / 53000)); // 1 in 53,000
-      const mainHit = landedOnMain && (Math.random() < (1 / 1200000)); // 1 in 1.2M
+      if (!result) {
+        console.error('No game result found');
+        return;
+      }
 
-      let winAmount = 0;
-      const isWin = payout > 0 || miniHit || mainHit;
+      const { payout, mainJackpotHit, miniJackpotHit } = result;
+      const payoutFormatted = formatUnits(payout, 18);
+      const payoutNum = parseFloat(payoutFormatted);
+      
+      const isWin = payoutNum > 0;
 
       // Update session stats
       setSessionStats(prev => ({
         ...prev,
         gamesPlayed: prev.gamesPlayed + 1,
         wins: isWin ? prev.wins + 1 : prev.wins,
+        totalWinnings: prev.totalWinnings + payoutNum,
       }));
 
       // Show result banner AFTER ball lands (with small delay)
       setTimeout(() => {
-        if (mainHit) {
-          // Main Jackpot: Pay 60%, keep 40% for reset/fees
-          winAmount = localJackpots.main * 0.60;
-          setPlayerBalance(prev => prev + winAmount);
-          setLocalJackpots(prev => ({
-            ...prev,
-            main: prev.main * 0.40,
-          }));
-          setSessionStats(prev => ({
-            ...prev,
-            totalWinnings: prev.totalWinnings + winAmount,
-          }));
+        if (mainJackpotHit) {
           setBanner({ kind: 'main', text: 'MAIN JACKPOT!!!' });
-          toast.success('MAIN JACKPOT WON!', {
-            description: `You won ${winAmount.toLocaleString()} PLS!`,
+          toast.success('🎉 MAIN JACKPOT WON!', {
+            description: `You won ${payoutNum.toLocaleString()} PLS369!`,
           });
-        } else if (miniHit) {
-          // Mini Jackpot: Pay 80%, keep 20% for reset/fees
-          winAmount = localJackpots.mini * 0.80;
-          setPlayerBalance(prev => prev + winAmount);
-          setLocalJackpots(prev => ({
-            ...prev,
-            mini: prev.mini * 0.20,
-          }));
-          setSessionStats(prev => ({
-            ...prev,
-            totalWinnings: prev.totalWinnings + winAmount,
-          }));
+        } else if (miniJackpotHit) {
           setBanner({ kind: 'mini', text: 'MINI JACKPOT!' });
-          toast.success('MINI JACKPOT WON!', {
-            description: `You won ${winAmount.toLocaleString()} PLS!`,
+          toast.success('🎊 MINI JACKPOT WON!', {
+            description: `You won ${payoutNum.toLocaleString()} PLS369!`,
           });
-        } else if (payout > 0) {
-          // Regular win from base prize pool
-          winAmount = ENTRY_FEE_PLS * payout;
-          setPlayerBalance(prev => prev + winAmount);
-          setSessionStats(prev => ({
-            ...prev,
-            totalWinnings: prev.totalWinnings + winAmount,
-          }));
-          setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
-          toast.success(`You won ${payout}x!`, {
-            description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
-          });
-        } else if (landedOnMini || landedOnMain) {
-          // Landed on jackpot slot but didn't win - close call!
-          setBanner({ kind: 'lose', text: 'So close! Try again!' });
-          toast.info('Almost hit the jackpot!', {
-            description: `Landed on ${landedOnMini ? 'MINI' : 'MAIN'} slot but didn't trigger. Keep playing!`,
+        } else if (isWin) {
+          setBanner({ kind: 'win', text: `WIN ${payoutNum.toLocaleString()} PLS369!` });
+          toast.success('You won!', {
+            description: `${payoutNum.toLocaleString()} PLS369 - Ball landed in slot ${landedSlot}`,
           });
         } else {
-          // Loss - jackpots already increased
           setBanner({ kind: 'lose', text: 'Try again!' });
           toast.info('Try again!', {
-            description: `Ball landed in slot ${landedSlot}. Jackpots are growing!`,
+            description: `Ball landed in slot ${landedSlot}. Better luck next time!`,
           });
         }
         
@@ -245,17 +209,35 @@ const PlinkoGame369 = () => {
         }, 2000);
       }, 300);
 
-      // Record the play
-      await axios.post(`${API}/game/record`, {
-        player_address: '0x0000000000000000000000000000000000000000',
-        slot: landedSlot,
-        payout,
-        is_jackpot: miniHit || mainHit,
-      });
+      // Record the play to backend (for stats)
+      try {
+        await axios.post(`${API}/game/record`, {
+          player_address: account || '0x0000000000000000000000000000000000000000',
+          slot: landedSlot,
+          payout: payoutNum,
+          is_jackpot: mainJackpotHit || miniJackpotHit,
+        });
+      } catch (error) {
+        console.error('Error recording play to backend:', error);
+        // Non-critical, continue
+      }
 
-      // Refresh state
-      fetchGameState();
+      // Refresh blockchain state
+      const state = await fetchBlockchainGameState();
+      if (state) {
+        setJackpots({
+          main: state.mainJackpot,
+          mini: state.miniJackpot,
+        });
+      }
+      
+      // Refresh balance
+      await fetchBalance();
+      
       fetchStats();
+      
+      // Clear stored result
+      delete window._lastGameResult;
     } catch (error) {
       console.error('Error handling ball landed:', error);
     }
