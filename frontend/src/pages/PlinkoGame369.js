@@ -243,19 +243,13 @@ const PlinkoGame369 = () => {
     }
   };
 
-  const handleDeposit = (amount) => {
-    setPlayerBalance(prev => prev + amount);
-  };
-
-  const handleWithdraw = (amount) => {
-    setPlayerBalance(0);
-    // Reset session stats on withdrawal
-    setSessionStats({
-      gamesPlayed: 0,
-      wins: 0,
-      totalSpent: 0,
-      totalWinnings: 0,
-    });
+  // Wallet button handler
+  const handleWalletAction = async () => {
+    if (isConnected) {
+      disconnectWallet();
+    } else {
+      await connectWallet();
+    }
   };
 
   return (
