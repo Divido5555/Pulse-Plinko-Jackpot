@@ -327,6 +327,120 @@ const PlinkoGame369 = () => {
     }
   };
 
+  // Auto-play multiple games
+  const playMultipleGames = async (numberOfGames) => {
+    setIsAutoPlaying(true);
+    setCurrentAutoPlay(0);
+    
+    for (let i = 0; i < numberOfGames; i++) {
+      if (!isAutoPlaying) break; // Allow cancellation
+      
+      setCurrentAutoPlay(i + 1);
+      console.log(`🎮 Auto-play: Game ${i + 1} of ${numberOfGames}`);
+      
+      await playOneGame();
+      
+      // Wait a bit between games for UX
+      if (i < numberOfGames - 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+    
+    setIsAutoPlaying(false);
+    setCurrentAutoPlay(0);
+    toast.success('Auto-play complete!', {
+      description: `Played ${numberOfGames} games`,
+    });
+  };
+
+  // Play a single game (extracted from handleLaunch)
+  const playOneGame = async () => {
+    // Clear any existing banner
+    setBanner(null);
+    
+    // Check wallet connection
+    if (!isConnected) {
+      toast.error('Wallet not connected', {
+        description: 'Please connect your wallet to play',
+      });
+      return false;
+    }
+
+    // Check network
+    if (!isCorrectNetwork) {
+      toast.warning('Wrong network', {
+        description: 'Please switch to PulseChain network',
+      });
+      await switchToPulseChain();
+      return false;
+    }
+
+    // Check balance
+    const balanceNum = parseFloat(balance);
+    if (balanceNum < ENTRY_PRICE_TOKENS) {
+      toast.error('Insufficient balance', {
+        description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
+      });
+      setIsAutoPlaying(false);
+      return false;
+    }
+
+    try {
+      // Update session stats (optimistically)
+      setSessionStats(prev => ({
+        ...prev,
+        totalSpent: prev.totalSpent + ENTRY_PRICE_TOKENS,
+      }));
+
+      // Call smart contract play function
+      console.log('⏳ Waiting for blockchain transaction to complete (may take up to 10 seconds)...');
+      
+      const result = await playGame();
+      console.log('✅ Blockchain confirmed, result:', result);
+      
+      if (!result) {
+        // Transaction failed or was rejected
+        setSessionStats(prev => ({
+          ...prev,
+          totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
+        }));
+        setIsAutoPlaying(false);
+        return false;
+      }
+
+      // Game result received and CONFIRMED by blockchain
+      console.log('🎲 Starting animation for slot:', result.slot);
+      
+      setFinalSlot(result.slot);
+      setIsBallFalling(true);
+      
+      // Store result for later processing when ball lands
+      window._lastGameResult = result;
+      
+      // Wait for animation to complete
+      await new Promise(resolve => {
+        const checkAnimation = setInterval(() => {
+          if (!isBallFalling) {
+            clearInterval(checkAnimation);
+            resolve();
+          }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          clearInterval(checkAnimation);
+          resolve();
+        }, 5000);
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error in playOneGame:', error);
+      setIsAutoPlaying(false);
+      return false;
+    }
+  };
+
   return (
     <div className="pulse369-container" data-testid="pulse369-game">
       <Backdrop />
