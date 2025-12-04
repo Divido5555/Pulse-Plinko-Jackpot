@@ -328,7 +328,7 @@ const PlinkoBoard369 = ({
     >
       <div className="mini-banner-top">
         <span className="mini-chip">MINI</span>
-        <b>{miniAmountPLS} PLS</b> • 
+        <b>{miniAmountPLS} PLS369</b> • 
         <span className="main-chip">MAIN</span>
         <b>Moving</b> — both move each play
       </div>
