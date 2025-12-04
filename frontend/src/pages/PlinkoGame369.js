@@ -60,6 +60,15 @@ const PlinkoGame369 = () => {
   const [miniIndex, setMiniIndex] = useState(null);
   const [mainIndex, setMainIndex] = useState(null);
 
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(`${API}/stats`);
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   // Fetch blockchain game state on mount and when connected
   useEffect(() => {
     const loadGameState = async () => {
@@ -85,15 +94,6 @@ const PlinkoGame369 = () => {
 
     return () => clearInterval(interval);
   }, [isConnected, fetchBlockchainGameState]);
-
-  const fetchStats = async () => {
-    try {
-      const response = await axios.get(`${API}/stats`);
-      setStats(response.data);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
 
   const handleLaunch = async () => {
     // Clear any existing banner immediately
