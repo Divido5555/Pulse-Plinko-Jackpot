@@ -42,12 +42,6 @@ const PlinkoGame369 = () => {
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
-  const [autoPlayCount, setAutoPlayCount] = useState(1); // Number of games to play
-  const [currentAutoPlay, setCurrentAutoPlay] = useState(0); // Current game in auto-play
-  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
-  
-  // Reference to track when animation completes (for auto-play)
-  const animationCompleteRef = React.useRef(null);
   
   // Session stats (local tracking with localStorage persistence)
   const [sessionStats, setSessionStats] = useState(() => {
