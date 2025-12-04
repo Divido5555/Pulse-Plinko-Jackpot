@@ -42,12 +42,23 @@ const PlinkoGame369 = () => {
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   
-  // Session stats (local tracking)
-  const [sessionStats, setSessionStats] = useState({
-    gamesPlayed: 0,
-    wins: 0,
-    totalSpent: 0,
-    totalWinnings: 0,
+  // Session stats (local tracking with localStorage persistence)
+  const [sessionStats, setSessionStats] = useState(() => {
+    // Try to load from localStorage
+    const saved = localStorage.getItem('pulse369_session_stats');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error loading session stats:', e);
+      }
+    }
+    return {
+      gamesPlayed: 0,
+      wins: 0,
+      totalSpent: 0,
+      totalWinnings: 0,
+    };
   });
   
   // Blockchain jackpot values
