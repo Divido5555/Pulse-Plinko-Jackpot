@@ -122,7 +122,7 @@ const PlinkoBoard369 = ({
   }, [isBallFalling, isAnimating, onJackpotIndicesChange]);
 
   const handlePuckDragStart = (e) => {
-    if (isAnimating || isBallFalling) return;
+    if (isAnimating || isBallFalling || isTransacting) return;
     setIsDragging(true);
     e.preventDefault();
   };
