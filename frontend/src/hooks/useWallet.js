@@ -116,15 +116,25 @@ export const useWallet = () => {
 
   // Fetch token balance
   const fetchBalance = useCallback(async (address, tokenContractInstance) => {
-    if (!tokenContractInstance || !address) return '0';
+    console.log('💰 fetchBalance called:', { address, hasContract: !!tokenContractInstance });
+    
+    if (!tokenContractInstance || !address) {
+      console.log('❌ Missing contract or address');
+      return '0';
+    }
     
     try {
+      console.log('📊 Calling balanceOf for address:', address);
       const bal = await tokenContractInstance.balanceOf(address);
+      console.log('Raw balance:', bal.toString());
+      
       const formatted = formatUnits(bal, 18);
+      console.log('Formatted balance:', formatted);
+      
       setBalance(formatted);
       return formatted;
     } catch (error) {
-      console.error('Error fetching balance:', error);
+      console.error('❌ Error fetching balance:', error);
       return '0';
     }
   }, []);
