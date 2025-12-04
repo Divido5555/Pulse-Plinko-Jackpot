@@ -1,82 +1,144 @@
-<analysis>
-The project began with a user request for an income-generating application, initially exploring trading bots and flash loans. The direction quickly pivoted from a Pionex API-based trading dashboard to a decentralized, pay-to-play Plinko game on the PulseChain blockchain. The development process has been highly iterative, driven by detailed and evolving user feedback.
+<analysis>**original_problem_statement:**
+The user wants to complete the development of a Pulse369 DAO Plinko Jackpot game. The project has pivoted to its final version, which is a fully on-chain game powered by a custom  ERC-20 token and Fetch Oracle for randomness.
 
-The initial version of the Plinko game was built with a basic UI and game logic. However, the user provided a comprehensive frontend upgrade pack, leading to a major redesign with a futuristic Pulse369 DAO theme, including a starfield background, floating token logos, and new UI components.
+The immediate task is to integrate the existing React frontend with the already deployed smart contracts on the PulseChain mainnet.
 
-Subsequent development cycles have focused on refining the user experience and game physics. This involved numerous changes to the game board layout, transitioning from emojis to real token logos, implementing a player wallet with deposit/withdraw functionality (including a QR code), and, most significantly, a complete overhaul of the Plinko board mechanics. The simple drop was replaced with a physics-based system featuring a user-draggable puck, realistic bounces, and individual peg-collision feedback. The most recent work involves correcting the peg layout to ensure a natural, non-linear puck fall, based on a pattern provided by the user.
-</analysis>
+**PRODUCT REQUIREMENTS:**
+1.  **Wallet Integration:** The frontend must connect to a user's wallet (e.g., MetaMask), detect the PulseChain network (ID 369), and display the user's  token balance.
+2.  **Game Contract Integration:** The Play button functionality must be wired to the smart contract. This involves:
+    *   Checking token  and prompting for  if necessary.
+    *   Calling the  function on the game contract.
+    *   The outcome of the game (which slot the puck lands in) is determined authoritatively by the  event emitted from the contract transaction, not by the frontend physics.
+3.  **UI Data Sync:**
+    *   Update the UI to show 20 prize slots instead of 24, with multipliers matching the contract.
+    *   Display the correct entry price: 10 PLS369.
+    *   Fetch and display real-time jackpot values from the  contract function.
 
-<product_requirements>
-The goal is to build a decentralized Pulse369 DAO • PulseChain Plinko Jackpot game. It's a pay-to-play game designed to attract users and advertise the PulseChain ecosystem.
+**User's preferred language**: English
 
-**Core Gameplay:**
-- **Entry Fee:** 10,000 PLS per game.
-- **Mechanics:** Players drag a puck (featuring the Pulse369 DAO logo) to one of four starting zones and release it. The puck falls through a 20-row staggered peg board with realistic physics, with pegs flashing on impact.
-- **Payouts:** The puck lands in one of 24 slots at the bottom, which determine the outcome (win, lose, or jackpot).
+**what currently exists?**
+The project is on the  branch, which contains the final, authoritative version of the code. This includes:
+- A polished React frontend that is currently in a visual-only demo mode with mock data.
+- Deployed and finalized smart contracts on PulseChain mainnet:
+    -  (Token Address: )
+    -  (Game Address: )
+- A full suite of documentation (, , etc.) and test files for the new system.
+- All legacy code (previous VRF-based and PLS-based versions) has been moved to a  directory.
+-  has been added to the frontend dependencies.
 
-**Tokenomics & Jackpots:**
-- **Jackpot Growth:** Each play contributes to a Main Jackpot (50%) and a Mini Jackpot (15%).
-- **Jackpot Wins:** Winning is based on a low-probability random check, not just landing on a visual badge. The moving MINI and MAIN badges are visual indicators.
-- **Payout Splits:** Main Jackpot win (60% to winner), Mini Jackpot win (80% to winner). The remainder is used for reset, host/dev fees, and burn.
+**Last working item**:
+- **Last item agent was working:** The agent began the frontend-to-contract integration task by installing the  library.
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** Manual testing. This task requires connecting a real wallet (like MetaMask) with PLS (for gas) and PLS369 tokens on the PulseChain network to interact with the frontend.
+- **User Testing Done:** N
 
-**Frontend & UX:**
-- **Theme:** A futuristic, dark starfield theme with floating token logos.
-- **Player Wallet:** Displays PLS balance, tracks session stats (P/L, games played), and facilitates deposits (via a scannable QR code and wallet address) and withdrawals.
-- **Demo Mode:** Starts users with 100,000 PLS for immediate testing.
-</product_requirements>
+**All Pending/In progress Issue list**:
+There are no outstanding bugs. The work is focused on a single, large feature implementation.
 
-<key_technical_concepts>
-- **Frontend:** React, JavaScript (ES6+), CSS for complex animations and layouts.
-- **Backend:** FastAPI (Python) to serve the frontend and provide API endpoints.
-- **Blockchain:** Solidity for the smart contract (),  for backend interaction.
-- **Game Physics:** Custom JavaScript logic simulating gravity, bounce, and collision detection within the Plinko board component.
-- **UI Libraries:** Shadcn UI components and  for the deposit QR code.
-</key_technical_concepts>
+**In progress Task List**:
+- **Task 1: Complete Wallet and Smart Contract Integration (P0)**
+    - **Where to resume:** The agent has installed . The next step is to create a configuration file in the frontend ( or similar) to store the contract addresses and ABIs, and then proceed with implementing the wallet connection logic.
+    - **What will be achieved with this?** The Plinko game will become fully functional, allowing users to connect their wallets and play using real  tokens on the PulseChain mainnet.
+    - **Status:** IN PROGRESS
+    - **Should Test frontend/backend/both after fix?** Frontend
+    - **Blocked on something:** None
 
-<code_architecture>
-The application follows a full-stack architecture with a React frontend, a FastAPI backend, and a Solidity smart contract.
+**Upcoming and Future Tasks**
+- There are no other scheduled tasks. The current focus is solely on completing the mainnet integration.
 
-**Directory Structure:**
+**Completed work in this session**
+- **Major Project Pivot & Cleanup:**
+    - Executed a complete pivot from a native PLS-based game to a  token-based game.
+    - Created the final smart contracts:  and .
+    - Rewrote all project documentation (, etc.) to reflect the final tokenomics and game mechanics.
+    - Cleaned the repository by moving all old and deprecated contract files and documents into a  folder.
+    - Synced the  branch to be the single source of truth for the final project version.
+- **Frontend UI Refinement:**
+    - Iteratively designed the Plinko board UI, including correcting the peg layout (to a staggered grid), optimizing peg spacing, and adding blockers at the top to prevent edge-channel drops.
+- **Initial Integration Step:**
+    - Installed  in the frontend project.
+
+**Earlier issues found/mentioned but not fixed**
+- **Issue 1: Preview URL Synchronization**
+    - The user previously faced issues where the preview URL would not update with the latest changes. This was attributed to a mix of server state, caching, and environment confusion between the original and forked projects.
+    - **Why to solve this issue and what will be achieved with this?** This issue is currently low priority as the user has pivoted to integrating with mainnet contracts directly, bypassing the need for a preview URL for the time being. However, if future feature development is required on a new fork, this issue may resurface.
+    - **Should Test frontend/backend/both after fix:** Frontend
+    - **Is recurring issue?** Y
+
+**Known issue recurrence from previous fork**
+- N/A
+
+**Code Architecture**
 
 
-**Key File Analysis:**
+**Key Technical Concepts**
+- **Frontend:** React, ethers.js v6, CSS
+- **Blockchain:** Solidity, PulseChain (ChainID 369), ERC-20
+- **3rd Party Services:** Fetch Oracle (for on-chain randomness)
+- **Game Logic:** The game's outcome is determined 100% on-chain by the  contract. The frontend is responsible for triggering the transaction and visually animating the result based on the contract's event log.
 
-- ****
-  - **Importance:** This file contains the core on-chain logic for the Plinko game, including prize distribution, jackpot funding, and payout rules. It is the decentralized heart of the application.
-  - **Changes:** Created based on the user's detailed tokenomics specifications. It has not been deployed yet.
+**key DB schema**
+- N/A (The application is decentralized and does not use a database for its core logic).
 
-- ****
-  - **Importance:** This is the main parent component that orchestrates the entire game. It manages the application's primary state, including player balance, jackpot amounts, game status (playing, idle), and session statistics. It passes state and callbacks down to child components like the  and .
-  - **Changes:** Heavily modified to handle the complex state logic required for the physics-based game, including managing the start and end of a game round, calculating jackpot growth, and triggering result banners.
+**changes in tech stack**
+- **ethers.js v6** was added to the frontend to enable wallet and contract communication.
+- The application's core logic has shifted from being mocked on the frontend to being authoritatively handled by on-chain smart contracts.
 
-- ****
-  - **Importance:** This is the most complex and frequently modified component. It is responsible for rendering the entire interactive game area: the draggable puck, the pegs, and the prize slots. It contains the custom physics engine for the puck's movement, including gravity, bounce logic, and collision detection with individual pegs and walls.
-  - **Changes:** Has undergone multiple major rewrites. It evolved from a simple grid to a physics-driven simulation. Recent changes added a draggable puck, individual peg flash on impact, and expanded the board to 14 rows and 24 slots. The last change was to implement a properly staggered peg layout.
+**All files of reference**
+- : Main component to implement wallet connection and  function logic.
+- : UI component that needs its slot rendering logic updated from 24 to 20 slots.
+- : Configuration file defining prize slots and multipliers; must be updated to match the contract.
+- : The source of truth for all game logic, events, and state.
+- : Contains the finalized overview of the project, architecture, and economics.
 
-- ****
-  - **Importance:** Manages all user balance and session-related UI. It provides functionality for players to deposit funds (via a displayed address and QR code) and withdraw them. It also tracks session-specific data like games played, wins, and profit/loss.
-  - **Changes:** Created to address the user's request for balance tracking. It was later enhanced to include deposit/withdrawal forms and a QR code for easy deposits.
+**Areas that need refactoring**:
+- ****: The  function and state management for player balance and jackpots must be completely refactored to remove mock data and integrate with blockchain reads/writes.
 
-- ****
-  - **Importance:** Contains all the custom styling for the Pulse369 DAO theme, including the starfield background, floating token animations, peg and slot styles, and the custom styling for the draggable puck.
-  - **Changes:** Created and expanded to implement the user's specific visual requirements, moving away from the initial generic design.
-</code_architecture>
+**key api endpoints**
+All key interactions are with the smart contracts on PulseChain:
+-  ()
+  - 
+  - 
+  - 
+-  ()
+  - 
+  - 
 
-<pending_tasks>
-- **Smart Contract Deployment:** The  contract is written but has not been deployed to the PulseChain network.
-- **Frontend-Contract Integration:** The frontend is currently running in a demo mode with mock data. It needs to be integrated with a live wallet (e.g., MetaMask/Wagmi) to interact with the deployed smart contract for real transactions.
-- **Production Deployment:** Neither the frontend nor the backend is deployed to a production environment.
-- **Version Control:** The code has not been pushed to a Git repository.
-</pending_tasks>
+**Critical Info for New Agent**
+- **The Pivot is Final:** All work must align with the  token-based game. Ignore any prior context related to VRF, native PLS entry fees, or different wallet structures (, ). The user's last several messages define the authoritative plan.
+- **On-Chain Authoritative:** The game's result is decided by the smart contract's  event, not the frontend. The frontend animation must reflect the slot number returned in the transaction receipt.
+- **Mainnet Contracts:** Use the provided mainnet addresses for the token and game contracts. No mock or testnet addresses.
+- **Next Step:** Your immediate task is to create a contract configuration file in the frontend () containing the provided addresses and contract ABIs, then proceed with the wallet connection logic in .
 
-<current_work>
-The immediate task is a critical fix for the game's core mechanic. The user pointed out that the Plinko board's pegs were not properly staggered, allowing the puck to fall straight through without bouncing, which ruins the game's suspense and randomness.
+**documents created in this job**
+- 
+- 
+- 
+- 
+-  (Updated final version)
+- All legacy files were moved into a  directory.
 
-The user provided a visual pattern for a correct, pyramid-like Plinko board and requested that it be extended to 20 rows. The previous AI engineer acknowledged this and was in the process of rewriting the  component to generate this new, correctly staggered 20-row peg layout. This involves recalculating the positions of every peg to ensure a natural, bouncing path for the puck, which is essential for the intended gameplay experience. The physics logic for collision detection and puck movement will need to be applied to this new peg structure.
+**Last 10 User Messages and any pending user messages**
+The user's last several messages provided a detailed, multi-step handoff package to pivot the project to its final form (the PLS369 token game), clean up the repository, and begin the frontend integration with deployed mainnet contracts. All these instructions are captured in the current plan. The last message explicitly lists the integration priorities.
 
-The current state of the application is a visually advanced but mechanically flawed demo. The UI, wallet system, and jackpot-tracking logic are in place, but the central gameplay experience is broken due to the incorrect peg layout.
-</current_work>
+**Project Health Check:**
+- **Broken:** The core game functionality is broken as the frontend is not connected to the blockchain.
+- **Mocked:** Player balance, jackpot values, and the entire game play logic are currently mocked in the React components.
 
-<optional_next_step>
-I will recreate the  component to generate a 20-row, properly staggered peg layout, as per the user's provided pattern, to ensure the puck bounces naturally.
-</optional_next_step>
+**3rd Party Integrations**:
+- **Fetch Oracle:** Used on-chain by the  contract to provide randomness. No frontend interaction is required.
+- **Ethers.js v6:** A new frontend dependency for wallet and contract communication.
+
+**Testing status**
+- **Testing agent used after significant changes:** YES, a  was used to diagnose a preview URL issue, though the root cause was environmental.
+- **Troubleshoot agent used after agent stuck in loop:** Yes.
+- **Test files created:**  (for the final contract).
+- **Known regressions:** None.
+
+**Credentials to test flow:**
+- A browser wallet (e.g., MetaMask) configured for the PulseChain Mainnet (ChainID: 369).
+- The wallet must be funded with  (for gas) and  tokens to play.
+
+**What agent forgot to execute**
+- The agent was in the process of executing the user's latest plan. It installed  but has not yet created the necessary configuration file for the contract ABIs and addresses, which is the logical next step before implementing the wallet connection.</analysis>
