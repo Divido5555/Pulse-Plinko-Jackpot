@@ -330,7 +330,7 @@ const PlinkoBoard369 = ({
         <span className="mini-chip">MINI</span>
         <b>{miniAmountPLS} PLS369</b> • 
         <span className="main-chip">MAIN</span>
-        <b>Moving</b> — both move each play
+        <b>{mainAmountPLS} PLS369</b>
       </div>
 
       {/* Extended Plinko Pegs Area with Staggered Layout */}
