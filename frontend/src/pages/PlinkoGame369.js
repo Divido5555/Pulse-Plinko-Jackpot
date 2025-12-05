@@ -1,69 +1,83 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { formatUnits } from 'ethers';
 import Backdrop from '../components/Backdrop';
 import GameHeader from '../components/GameHeader';
 import PlinkoBoard369 from '../components/PlinkoBoard369';
 import ResultBanner from '../components/ResultBanner';
 import AdminGate from '../components/AdminGate';
-import PlayerWallet from '../components/PlayerWallet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings } from 'lucide-react';
+import { Settings, Wallet } from 'lucide-react';
+import { useWallet } from '../hooks/useWallet';
+import { ENTRY_PRICE_TOKENS } from '../config/contracts';
 import '@/styles/pulse369.css';
 import '@/styles/wallet.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-const ENTRY_FEE_PLS = 10000; // 10,000 PLS per play
 
 const PlinkoGame369 = () => {
+  // Wallet integration
+  const {
+    account,
+    balance,
+    isConnected,
+    isConnecting,
+    isCorrectNetwork,
+    connectWallet,
+    disconnectWallet,
+    switchToPulseChain,
+    playGame,
+    fetchGameState: fetchBlockchainGameState,
+    fetchBalance,
+  } = useWallet();
+
   const [gameState, setGameState] = useState(null);
   const [isBallFalling, setIsBallFalling] = useState(false);
   const [finalSlot, setFinalSlot] = useState(null);
   const [banner, setBanner] = useState(null);
-  const [connectedAddress, setConnectedAddress] = useState(null);
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [isTransacting, setIsTransacting] = useState(false);
   
-  // Player wallet & session state
-  const [playerBalance, setPlayerBalance] = useState(100000); // Start with 100,000 PLS for testing
-  const [sessionStats, setSessionStats] = useState({
-    gamesPlayed: 0,
-    wins: 0,
-    totalSpent: 0,
-    totalWinnings: 0,
+  // Ref to store game result between launch and ball landing
+  const lastGameResultRef = useRef(null);
+  
+  // Session stats (local tracking with localStorage persistence)
+  const [sessionStats, setSessionStats] = useState(() => {
+    // Try to load from localStorage
+    const saved = localStorage.getItem('pulse369_session_stats');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error loading session stats:', e);
+      }
+    }
+    return {
+      gamesPlayed: 0,
+      wins: 0,
+      totalSpent: 0,
+      totalWinnings: 0,
+    };
   });
   
-  // Local jackpot tracking (grows with each play)
-  const [localJackpots, setLocalJackpots] = useState({
-    main: 52341.50,
-    mini: 8762.30,
+  // Blockchain jackpot values and game stats
+  const [jackpots, setJackpots] = useState({
+    main: '0',
+    mini: '0',
+  });
+  
+  const [blockchainStats, setBlockchainStats] = useState({
+    playCount: 0,
+    entryPrice: '10',
   });
   
   // Track jackpot slot indices
   const [miniIndex, setMiniIndex] = useState(null);
   const [mainIndex, setMainIndex] = useState(null);
-
-  useEffect(() => {
-    fetchGameState();
-    fetchStats();
-    const interval = setInterval(() => {
-      fetchGameState();
-      fetchStats();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchGameState = async () => {
-    try {
-      const response = await axios.get(`${API}/game/state`);
-      setGameState(response.data);
-    } catch (error) {
-      console.error('Error fetching game state:', error);
-    }
-  };
 
   const fetchStats = async () => {
     try {
@@ -74,121 +88,184 @@ const PlinkoGame369 = () => {
     }
   };
 
+  // Save session stats to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('pulse369_session_stats', JSON.stringify(sessionStats));
+  }, [sessionStats]);
+
+  // Fetch blockchain game state on mount and periodically
+  useEffect(() => {
+    const loadGameState = async () => {
+      // Try to fetch game state whether connected or not
+      // This allows viewing jackpots without connecting wallet
+      const state = await fetchBlockchainGameState();
+      if (state) {
+        setJackpots({
+          main: state.mainJackpot,
+          mini: state.miniJackpot,
+        });
+        setBlockchainStats({
+          playCount: state.playCount,
+          entryPrice: state.entryPrice,
+        });
+      }
+    };
+
+    // Initial load
+    loadGameState();
+    fetchStats();
+
+    // Refresh game state every 10 seconds (faster for active games)
+    const interval = setInterval(() => {
+      loadGameState();
+      fetchStats();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [fetchBlockchainGameState]);
+
   const handleLaunch = async () => {
-    // Clear any existing banner immediately
-    setBanner(null);
-    
-    // Check balance
-    if (playerBalance < ENTRY_FEE_PLS) {
-      toast.error('Insufficient balance', {
-        description: `You need ${ENTRY_FEE_PLS.toLocaleString()} PLS to play`,
+    // Prevent multiple simultaneous transactions
+    if (isTransacting) {
+      toast.warning('Transaction in progress', {
+        description: 'Please wait for current transaction to complete',
       });
       return;
     }
 
-    // Deduct entry fee
-    setPlayerBalance(prev => prev - ENTRY_FEE_PLS);
-    setSessionStats(prev => ({
-      ...prev,
-      totalSpent: prev.totalSpent + ENTRY_FEE_PLS,
-    }));
+    // Clear any existing banner
+    setBanner(null);
 
-    // Add to jackpots (50% to main, 15% to mini)
-    setLocalJackpots(prev => ({
-      main: prev.main + (ENTRY_FEE_PLS * 0.50),
-      mini: prev.mini + (ENTRY_FEE_PLS * 0.15),
-    }));
+    // Check wallet connection
+    if (!isConnected) {
+      toast.error('Wallet not connected', {
+        description: 'Please connect your wallet to play',
+      });
+      return;
+    }
 
-    // Generate random slot
-    const slot = Math.floor(Math.random() * 20);
-    setFinalSlot(slot);
-    setIsBallFalling(true);
+    // Check network
+    if (!isCorrectNetwork) {
+      toast.warning('Wrong network', {
+        description: 'Please switch to PulseChain network',
+      });
+      await switchToPulseChain();
+      return;
+    }
+
+    // Check balance
+    const balanceNum = parseFloat(balance);
+    if (balanceNum < ENTRY_PRICE_TOKENS) {
+      toast.error('Insufficient balance', {
+        description: `You need at least ${ENTRY_PRICE_TOKENS} PLS369 to play`,
+      });
+      return;
+    }
+
+    // Set transacting state to lock UI
+    setIsTransacting(true);
+
+    try {
+      // Update session stats (optimistically)
+      setSessionStats(prev => ({
+        ...prev,
+        totalSpent: prev.totalSpent + ENTRY_PRICE_TOKENS,
+      }));
+
+      // Call smart contract play function
+      // This waits for blockchain confirmation before proceeding (up to 10+ seconds)
+      toast.info('Transaction sent', {
+        description: 'Waiting for blockchain confirmation...',
+        duration: 5000,
+      });
+      
+      const result = await playGame();
+      
+      if (!result) {
+        // Transaction failed or was rejected
+        // Revert optimistic update
+        setSessionStats(prev => ({
+          ...prev,
+          totalSpent: Math.max(0, prev.totalSpent - ENTRY_PRICE_TOKENS),
+        }));
+        setIsTransacting(false);
+        return;
+      }
+
+      // Game result received and CONFIRMED by blockchain
+      // NOW start the animation with the confirmed slot
+      toast.success('Transaction confirmed!', {
+        description: `Puck will land in slot ${result.slot}`,
+      });
+      
+      setFinalSlot(result.slot);
+      setIsBallFalling(true);
+      
+      // Store result for later processing when ball lands
+      lastGameResultRef.current = result;
+      
+      // Unlock UI after animation starts
+      setIsTransacting(false);
+    } catch (error) {
+      console.error('Error in handleLaunch:', error);
+      setIsTransacting(false);
+      toast.error('Transaction failed', {
+        description: error.message || 'Please try again',
+      });
+    }
   };
 
   const handleBallLanded = async (landedSlot) => {
+    // Reset ball falling state
+    setIsBallFalling(false);
+    
     // Clear banner first
     setBanner(null);
     
     try {
-      // Determine outcome
-      const prizeSlots = { 1: 1.1, 6: 1.5, 11: 2.0, 15: 3.0, 19: 5.0 };
-      const payout = prizeSlots[landedSlot] || 0;
+      // Get the result from ref (stored during handleLaunch)
+      const result = lastGameResultRef.current;
       
-      // Check if ball landed on jackpot slots AND passes probability check
-      const landedOnMini = landedSlot === miniIndex;
-      const landedOnMain = landedSlot === mainIndex;
-      
-      // Actual jackpot odds (very rare)
-      const miniHit = landedOnMini && (Math.random() < (1 / 53000)); // 1 in 53,000
-      const mainHit = landedOnMain && (Math.random() < (1 / 1200000)); // 1 in 1.2M
+      if (!result) {
+        console.error('No game result found');
+        return;
+      }
 
-      let winAmount = 0;
-      const isWin = payout > 0 || miniHit || mainHit;
+      const { payout, mainJackpotHit, miniJackpotHit } = result;
+      const payoutFormatted = formatUnits(payout, 18);
+      const payoutNum = parseFloat(payoutFormatted);
+      
+      const isWin = payoutNum > 0;
 
       // Update session stats
       setSessionStats(prev => ({
         ...prev,
         gamesPlayed: prev.gamesPlayed + 1,
         wins: isWin ? prev.wins + 1 : prev.wins,
+        totalWinnings: prev.totalWinnings + payoutNum,
       }));
 
       // Show result banner AFTER ball lands (with small delay)
       setTimeout(() => {
-        if (mainHit) {
-          // Main Jackpot: Pay 60%, keep 40% for reset/fees
-          winAmount = localJackpots.main * 0.60;
-          setPlayerBalance(prev => prev + winAmount);
-          setLocalJackpots(prev => ({
-            ...prev,
-            main: prev.main * 0.40,
-          }));
-          setSessionStats(prev => ({
-            ...prev,
-            totalWinnings: prev.totalWinnings + winAmount,
-          }));
+        if (mainJackpotHit) {
           setBanner({ kind: 'main', text: 'MAIN JACKPOT!!!' });
-          toast.success('MAIN JACKPOT WON!', {
-            description: `You won ${winAmount.toLocaleString()} PLS!`,
+          toast.success('🎉 MAIN JACKPOT WON!', {
+            description: `You won ${payoutNum.toLocaleString()} PLS369!`,
           });
-        } else if (miniHit) {
-          // Mini Jackpot: Pay 80%, keep 20% for reset/fees
-          winAmount = localJackpots.mini * 0.80;
-          setPlayerBalance(prev => prev + winAmount);
-          setLocalJackpots(prev => ({
-            ...prev,
-            mini: prev.mini * 0.20,
-          }));
-          setSessionStats(prev => ({
-            ...prev,
-            totalWinnings: prev.totalWinnings + winAmount,
-          }));
+        } else if (miniJackpotHit) {
           setBanner({ kind: 'mini', text: 'MINI JACKPOT!' });
-          toast.success('MINI JACKPOT WON!', {
-            description: `You won ${winAmount.toLocaleString()} PLS!`,
+          toast.success('🎊 MINI JACKPOT WON!', {
+            description: `You won ${payoutNum.toLocaleString()} PLS369!`,
           });
-        } else if (payout > 0) {
-          // Regular win from base prize pool
-          winAmount = ENTRY_FEE_PLS * payout;
-          setPlayerBalance(prev => prev + winAmount);
-          setSessionStats(prev => ({
-            ...prev,
-            totalWinnings: prev.totalWinnings + winAmount,
-          }));
-          setBanner({ kind: 'win', text: `WIN ${winAmount.toLocaleString()} PLS!` });
-          toast.success(`You won ${payout}x!`, {
-            description: `${winAmount.toLocaleString()} PLS - Ball landed in slot ${landedSlot}`,
-          });
-        } else if (landedOnMini || landedOnMain) {
-          // Landed on jackpot slot but didn't win - close call!
-          setBanner({ kind: 'lose', text: 'So close! Try again!' });
-          toast.info('Almost hit the jackpot!', {
-            description: `Landed on ${landedOnMini ? 'MINI' : 'MAIN'} slot but didn't trigger. Keep playing!`,
+        } else if (isWin) {
+          setBanner({ kind: 'win', text: `WIN ${payoutNum.toLocaleString()} PLS369!` });
+          toast.success('You won!', {
+            description: `${payoutNum.toLocaleString()} PLS369 - Ball landed in slot ${landedSlot}`,
           });
         } else {
-          // Loss - jackpots already increased
           setBanner({ kind: 'lose', text: 'Try again!' });
           toast.info('Try again!', {
-            description: `Ball landed in slot ${landedSlot}. Jackpots are growing!`,
+            description: `Ball landed in slot ${landedSlot}. Better luck next time!`,
           });
         }
         
@@ -198,35 +275,47 @@ const PlinkoGame369 = () => {
         }, 2000);
       }, 300);
 
-      // Record the play
-      await axios.post(`${API}/game/record`, {
-        player_address: '0x0000000000000000000000000000000000000000',
-        slot: landedSlot,
-        payout,
-        is_jackpot: miniHit || mainHit,
-      });
+      // Record the play to backend (for stats)
+      try {
+        await axios.post(`${API}/game/record`, {
+          player_address: account || '0x0000000000000000000000000000000000000000',
+          slot: landedSlot,
+          payout: payoutNum,
+          is_jackpot: mainJackpotHit || miniJackpotHit,
+        });
+      } catch (error) {
+        console.error('Error recording play to backend:', error);
+        // Non-critical, continue
+      }
 
-      // Refresh state
-      fetchGameState();
+      // Refresh blockchain state
+      const state = await fetchBlockchainGameState();
+      if (state) {
+        setJackpots({
+          main: state.mainJackpot,
+          mini: state.miniJackpot,
+        });
+      }
+      
+      // Refresh balance
+      await fetchBalance();
+      
       fetchStats();
+      
+      // Clear stored result
+      lastGameResultRef.current = null;
     } catch (error) {
       console.error('Error handling ball landed:', error);
     }
   };
 
-  const handleDeposit = (amount) => {
-    setPlayerBalance(prev => prev + amount);
-  };
-
-  const handleWithdraw = (amount) => {
-    setPlayerBalance(0);
-    // Reset session stats on withdrawal
-    setSessionStats({
-      gamesPlayed: 0,
-      wins: 0,
-      totalSpent: 0,
-      totalWinnings: 0,
-    });
+  // Wallet button handler
+  const handleWalletAction = async () => {
+    if (isConnected) {
+      disconnectWallet();
+    } else {
+      await connectWallet();
+    }
   };
 
   return (
@@ -234,20 +323,57 @@ const PlinkoGame369 = () => {
       <Backdrop />
 
       <div className="content-wrapper">
+        {/* Wallet Connection Button */}
+        <div className="wallet-button-container" style={{ 
+          position: 'absolute', 
+          top: '90px', 
+          right: '20px', 
+          zIndex: 100,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}>
+          <Button
+            onClick={handleWalletAction}
+            disabled={isConnecting}
+            variant={isConnected ? "outline" : "default"}
+            size="lg"
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            {isConnecting 
+              ? 'Connecting...' 
+              : isConnected 
+                ? `${account.slice(0, 6)}...${account.slice(-4)}` 
+                : 'Connect Wallet'}
+          </Button>
+          {isConnected && !isCorrectNetwork && (
+            <Button
+              onClick={switchToPulseChain}
+              variant="destructive"
+              size="sm"
+            >
+              Switch to PulseChain
+            </Button>
+          )}
+        </div>
+
         <GameHeader
-          miniAmountPLS={localJackpots.mini.toFixed(2)}
-          mainAmountPLS={localJackpots.main.toFixed(2)}
+          miniAmountPLS={parseFloat(jackpots.mini).toFixed(2)}
+          mainAmountPLS={parseFloat(jackpots.main).toFixed(2)}
         />
 
         <div className="game-layout">
           {/* Main Game Board */}
           <div className="board-column">
+            {/* Single game play - 10 PLS369 per game */}
             <PlinkoBoard369
               isBallFalling={isBallFalling}
               onLaunch={handleLaunch}
               onBallLanded={handleBallLanded}
-              miniAmountPLS={localJackpots.mini.toFixed(2)}
+              miniAmountPLS={parseFloat(jackpots.mini).toFixed(2)}
+              mainAmountPLS={parseFloat(jackpots.main).toFixed(2)}
               finalSlot={finalSlot}
+              isTransacting={isTransacting}
               onJackpotIndicesChange={(mini, main) => {
                 setMiniIndex(mini);
                 setMainIndex(main);
@@ -258,44 +384,95 @@ const PlinkoGame369 = () => {
             <div className="info-card-compact">
               <div className="info-compact-title">How to Play</div>
               <div className="info-compact-content">
-                <span><strong>Entry:</strong> 10,000 PLS</span> • 
-                <span><strong>Wins:</strong> Slots 1,5,9,13,17</span> • 
-                <span><strong>Jackpots:</strong> Land on badges + pass odds</span>
+                <span><strong>Entry:</strong> 10 PLS369</span> • 
+                <span><strong>Wins:</strong> Slots 3,7,11,15,18</span> • 
+                <span><strong>Jackpots:</strong> Slots 10 (Main), 2 & 16 (Mini)</span> • 
+                <a 
+                  href="https://web.telegram.org/k/#@pulse369dao" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: '#00d9ff', textDecoration: 'none', fontWeight: 'bold' }}
+                >
+                  Whitepaper
+                </a>
               </div>
             </div>
           </div>
 
           {/* Stats Sidebar */}
           <div className="stats-column">
-            {/* Player Wallet */}
-            <PlayerWallet
-              balance={playerBalance}
-              onDeposit={handleDeposit}
-              onWithdraw={handleWithdraw}
-              sessionStats={sessionStats}
-            />
+            {/* Player Balance Card */}
+            <Card className="stats-card">
+              <CardHeader>
+                <CardTitle>Your Balance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="stat-row">
+                  <span>PLS369 Balance</span>
+                  <span className="stat-value green">
+                    {isConnected ? parseFloat(balance).toFixed(2) : '0.00'}
+                  </span>
+                </div>
+                <div className="stat-row">
+                  <span>Games Played</span>
+                  <span className="stat-value">{sessionStats.gamesPlayed}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Total Wins</span>
+                  <span className="stat-value green">{sessionStats.wins}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Total Spent</span>
+                  <span className="stat-value">{sessionStats.totalSpent.toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Total Winnings</span>
+                  <span className="stat-value purple">{sessionStats.totalWinnings.toFixed(2)}</span>
+                </div>
+                {sessionStats.gamesPlayed > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSessionStats({
+                        gamesPlayed: 0,
+                        wins: 0,
+                        totalSpent: 0,
+                        totalWinnings: 0,
+                      });
+                      toast.info('Session stats reset');
+                    }}
+                    style={{ marginTop: '12px', width: '100%' }}
+                  >
+                    Reset Session Stats
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
 
-            {stats && (
-              <Card className="stats-card">
-                <CardHeader>
-                  <CardTitle>Game Stats</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="stat-row">
-                    <span>Total Plays</span>
-                    <span className="stat-value">{stats.total_plays.toLocaleString()}</span>
-                  </div>
-                  <div className="stat-row">
-                    <span>Win Rate</span>
-                    <span className="stat-value green">{(stats.win_rate * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="stat-row">
-                    <span>Jackpot Wins</span>
-                    <span className="stat-value purple">{stats.jackpot_wins}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="stats-card">
+              <CardHeader>
+                <CardTitle>Contract Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="stat-row">
+                  <span>Total Plays</span>
+                  <span className="stat-value">{blockchainStats.playCount.toLocaleString()}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Entry Price</span>
+                  <span className="stat-value">{parseFloat(blockchainStats.entryPrice).toFixed(0)} PLS369</span>
+                </div>
+                <div className="stat-row">
+                  <span>Main Jackpot</span>
+                  <span className="stat-value purple">{parseFloat(jackpots.main).toFixed(2)}</span>
+                </div>
+                <div className="stat-row">
+                  <span>Mini Jackpot</span>
+                  <span className="stat-value green">{parseFloat(jackpots.mini).toFixed(2)}</span>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Admin Button */}
             <Button
@@ -310,15 +487,15 @@ const PlinkoGame369 = () => {
 
             {/* Admin Panel (gated) */}
             {showAdmin && (
-              <AdminGate connectedAddress={connectedAddress}>
+              <AdminGate connectedAddress={account}>
                 <Card className="admin-card">
                   <CardHeader>
                     <CardTitle>Admin Panel</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-gray-400">Host wallet only</p>
+                    <p className="text-sm text-gray-400">Owner wallet only</p>
                     <p className="text-xs text-gray-500 mt-2">
-                      Connect wallet matching HOST_ADDRESS to access controls
+                      Connect wallet matching contract owner to access controls
                     </p>
                   </CardContent>
                 </Card>

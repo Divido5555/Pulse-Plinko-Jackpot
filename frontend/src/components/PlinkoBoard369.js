@@ -3,14 +3,14 @@ import { SLOTS, MINI_CANDIDATE_INDICES, TOKEN_LOGOS } from '../config/slots';
 import { PULSE369_LOGO } from '../config/tokenAssets';
 import BLOCKER_SVG from '../assets/blocker.svg';
 
-const ENTRY_FEE_PLS = 10000;
-
 const PlinkoBoard369 = ({
   isBallFalling,
   onLaunch,
   onBallLanded,
   miniAmountPLS,
+  mainAmountPLS,
   finalSlot,
+  isTransacting = false,
   onJackpotIndicesChange,
 }) => {
   const [miniIndex, setMiniIndex] = useState(
@@ -101,6 +101,13 @@ const PlinkoBoard369 = ({
     setBlockerPositions(blockers);
   }, []);
 
+  // Start animation when parent sets isBallFalling to true (after blockchain confirmation)
+  useEffect(() => {
+    if (isBallFalling && !isAnimating && finalSlot !== null) {
+      startPuckAnimation();
+    }
+  }, [isBallFalling, isAnimating, finalSlot]);
+
   // Shuffle badges
   useEffect(() => {
     if (!isBallFalling && !isAnimating) {
@@ -120,7 +127,7 @@ const PlinkoBoard369 = ({
   }, [isBallFalling, isAnimating, onJackpotIndicesChange]);
 
   const handlePuckDragStart = (e) => {
-    if (isAnimating || isBallFalling) return;
+    if (isAnimating || isBallFalling || isTransacting) return;
     setIsDragging(true);
     e.preventDefault();
   };
@@ -157,7 +164,12 @@ const PlinkoBoard369 = ({
   const handlePuckDragEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    startPuckAnimation();
+    
+    // Call the blockchain play function instead of starting animation directly
+    // The parent component will start animation after blockchain confirms
+    if (onLaunch) {
+      onLaunch();
+    }
   };
 
   const checkBlockerCollision = (x, y, vx, vy) => {
@@ -288,13 +300,15 @@ const PlinkoBoard369 = ({
       
       // Check if reached bottom (90% down)
       if (currentY >= 90) {
-        // Map X position to slot (24 slots)
-        const slotIndex = Math.round((currentX / 100) * 23);
-        const finalSlot = Math.max(0, Math.min(23, slotIndex));
+        // Use the finalSlot from blockchain (passed as prop)
+        // NOT calculated from X position - blockchain is authoritative!
+        // Fallback uses total slot count from configuration
+        const totalSlots = SLOTS.length;
+        const landedSlotNumber = finalSlot !== null ? finalSlot : Math.round((currentX / 100) * (totalSlots - 1));
         
-        setLandedSlot(finalSlot);
+        setLandedSlot(landedSlotNumber);
         setTimeout(() => {
-          onBallLanded(finalSlot);
+          onBallLanded(landedSlotNumber);
           setIsAnimating(false);
           setPuckPosition({ x: 50, y: 3 });
           velocityRef.current = { vx: 0, vy: 0 };
@@ -328,9 +342,9 @@ const PlinkoBoard369 = ({
     >
       <div className="mini-banner-top">
         <span className="mini-chip">MINI</span>
-        <b>{miniAmountPLS} PLS</b> • 
+        <b>{miniAmountPLS} PLS369</b> • 
         <span className="main-chip">MAIN</span>
-        <b>Moving</b> — both move each play
+        <b>{mainAmountPLS} PLS369</b>
       </div>
 
       {/* Extended Plinko Pegs Area with Staggered Layout */}
@@ -377,7 +391,7 @@ const PlinkoBoard369 = ({
         </div>
       </div>
 
-      {/* 24 Slots at Bottom */}
+      {/* 20 Slots at Bottom */}
       <div className="slots-row-24">
         {SLOTS.map((s) => (
           <div
@@ -409,7 +423,9 @@ const PlinkoBoard369 = ({
 
       {/* Instructions */}
       <div className="puck-instructions">
-        {!isAnimating ? (
+        {isTransacting ? (
+          <p>⏳ <strong>Waiting for blockchain...</strong> (up to 10 sec)</p>
+        ) : !isAnimating ? (
           <p><strong>Drag the puck</strong> and release to drop!</p>
         ) : (
           <p>Puck falling...</p>

@@ -7,6 +7,29 @@ The `main` branch reflects the finalized, DAO-aligned, **PLS369-only** model.
 
 ---
 
+## 🚀 Frontend Features (New!)
+
+The frontend now includes **full PulseChain blockchain integration**:
+
+- **Universal Wallet Support**: MetaMask, Safe, Rainbow, Coinbase Wallet, and any EIP-1193 compatible wallet
+- **PulseChain Mainnet Integration**: Connected to deployed smart contracts
+- **Real Blockchain Transactions**: Play function calls actual smart contract `play()` method
+- **Live Jackpot Values**: Fetched from blockchain in real-time
+- **Token Approval Flow**: Handles PLS369 token approvals for gameplay
+- **Session Stats Persistence**: LocalStorage-based session tracking
+
+### Deployment
+
+See [DEPLOYMENT_REVIEW.md](./DEPLOYMENT_REVIEW.md) and [GITHUB_AND_DEPLOY.md](./GITHUB_AND_DEPLOY.md) for full deployment instructions.
+
+**Quick Deploy:**
+1. Deploy frontend to [Vercel](https://vercel.com)
+2. Deploy backend to [Railway](https://railway.app)
+3. Configure environment variables
+4. Test with real wallet and PLS369 tokens
+
+---
+
 ## 🔗 Mainnet Contracts (PulseChain)
 
 - **PLS369 Token**: `0x55aC731aAa3442CE4D8bd8486eE4521B1D6Af5EC`
@@ -67,6 +90,15 @@ Per-play distribution (from the 10 PLS369 entry) is split between:
 - **Immediate prize payouts** (from winning slots)
 
 The exact percentages are encoded as constants in the contract and can be read directly on-chain or via `docs/GAME_ECONOMICS.md`.
+
+---
+
+## 🎰 Game Economics
+
+- **Entry fee**: 10 PLS369 tokens
+- **Prize slots**: 3 (3x), 7 (2x), 11 (5x), 15 (2x), 18 (2x)
+- **Jackpot slots**: 10 (Main), 2 & 16 (Mini)
+- **All outcomes determined by blockchain** (Fetch Oracle randomness)
 
 ---
 
