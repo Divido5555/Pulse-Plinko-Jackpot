@@ -302,7 +302,9 @@ const PlinkoBoard369 = ({
       if (currentY >= 90) {
         // Use the finalSlot from blockchain (passed as prop)
         // NOT calculated from X position - blockchain is authoritative!
-        const landedSlotNumber = finalSlot !== null ? finalSlot : Math.round((currentX / 100) * 19);
+        // Fallback uses total slot count from configuration
+        const totalSlots = SLOTS.length;
+        const landedSlotNumber = finalSlot !== null ? finalSlot : Math.round((currentX / 100) * (totalSlots - 1));
         
         setLandedSlot(landedSlotNumber);
         setTimeout(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { formatUnits } from 'ethers';
@@ -41,6 +41,9 @@ const PlinkoGame369 = () => {
   const [stats, setStats] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [isTransacting, setIsTransacting] = useState(false);
+  
+  // Ref to store game result between launch and ball landing
+  const lastGameResultRef = useRef(null);
   
   // Session stats (local tracking with localStorage persistence)
   const [sessionStats, setSessionStats] = useState(() => {
@@ -199,7 +202,7 @@ const PlinkoGame369 = () => {
       setIsBallFalling(true);
       
       // Store result for later processing when ball lands
-      window._lastGameResult = result;
+      lastGameResultRef.current = result;
       
       // Unlock UI after animation starts
       setIsTransacting(false);
@@ -220,8 +223,8 @@ const PlinkoGame369 = () => {
     setBanner(null);
     
     try {
-      // Get the result from blockchain (stored in window during handleLaunch)
-      const result = window._lastGameResult;
+      // Get the result from ref (stored during handleLaunch)
+      const result = lastGameResultRef.current;
       
       if (!result) {
         console.error('No game result found');
@@ -300,7 +303,7 @@ const PlinkoGame369 = () => {
       fetchStats();
       
       // Clear stored result
-      delete window._lastGameResult;
+      lastGameResultRef.current = null;
     } catch (error) {
       console.error('Error handling ball landed:', error);
     }

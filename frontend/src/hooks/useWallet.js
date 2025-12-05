@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserProvider, Contract, formatUnits, parseUnits } from 'ethers';
 import { toast } from 'sonner';
 import {
@@ -25,6 +25,9 @@ export const useWallet = () => {
   const [balance, setBalance] = useState('0');
   const [chainId, setChainId] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  
+  // Track if auto-reconnect has been attempted (prevents infinite loops)
+  const hasAttemptedAutoConnect = useRef(false);
 
   // Check if wallet is installed
   const isWalletInstalled = useCallback(() => {
@@ -413,9 +416,13 @@ export const useWallet = () => {
     };
   }, [account, disconnectWallet, tokenContract, fetchBalance]);
 
-  // Auto-connect if previously connected
+  // Auto-connect if previously connected (only runs once on mount)
   useEffect(() => {
     const checkConnection = async () => {
+      // Only attempt auto-connect once to prevent infinite loops
+      if (hasAttemptedAutoConnect.current) return;
+      hasAttemptedAutoConnect.current = true;
+      
       if (!isWalletInstalled()) return;
 
       try {
@@ -433,7 +440,7 @@ export const useWallet = () => {
     };
 
     checkConnection();
-  }, [isWalletInstalled, connectWallet]);
+  }, []); // Empty deps - only run once on mount
 
   // Wrapper function to fetch balance with current state
   const refreshBalance = useCallback(async () => {
