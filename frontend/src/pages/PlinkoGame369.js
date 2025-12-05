@@ -195,7 +195,7 @@ const PlinkoGame369 = () => {
       // Game result received and CONFIRMED by blockchain
       // NOW start the animation with the confirmed slot
       toast.success('Transaction confirmed!', {
-        description: `Puck will land in slot ${result.slot}`,
+        description: 'Watch the puck fall!',
       });
       
       setFinalSlot(result.slot);
